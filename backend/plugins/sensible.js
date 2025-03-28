@@ -3,7 +3,7 @@
 const fp = require('fastify-plugin')
 
 /**
- * This plugins adds some utilities to handle http errors
+ * This plugin adds some utilities to handle http errors
  *
  * @see https://github.com/fastify/fastify-sensible
  */
