@@ -2,7 +2,7 @@
 
 import path from "node:path"
 import AutoLoad from "@fastify/autoload"
-import {FastifyInstance, FastifyPluginAsync, FastifyPluginOptions} from "fastify"
+import {FastifyInstance, FastifyPluginAsync} from "fastify"
 
 const startServer: FastifyPluginAsync = async (server: FastifyInstance) => {
 
@@ -24,8 +24,6 @@ const startServer: FastifyPluginAsync = async (server: FastifyInstance) => {
         dir: path.join(__dirname, 'routes'),
         options: Object.assign({})
     })
-
-    // opts.port = opts.port || Number(process.env.PORT) || 4000
 }
 
 export default startServer

@@ -9,7 +9,7 @@
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "test": "node --test test/**/*.test.js",
-    "start": "node dist/app.js",
+    "start": "fastify start dist/app.js",
     "dev": "tsc-watch --noClear --onSuccess \"fastify start -w -l info -P dist/app.js\""
   },
   "keywords": [],
