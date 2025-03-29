@@ -7,7 +7,6 @@ import {FastifyInstance, FastifyPluginAsync} from 'fastify';
 // to export the decorators to the outer scope
 
 const supportPlugin: FastifyPluginAsync = fastifyPlugin(async function (fastify: FastifyInstance) {
-  console.log('loading support plugin')
   fastify.decorate('someSupport', function () {
     return 'hugs'
   })

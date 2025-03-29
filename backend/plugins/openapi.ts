@@ -4,7 +4,6 @@ import {FastifyInstance, FastifyPluginAsync} from "fastify";
 import fastifySwagger, {SwaggerOptions} from "@fastify/swagger";
 
 const swaggerPlugin: FastifyPluginAsync = async (fastify: FastifyInstance) =>  {
-    console.log('loading swagger plugin')
 
     const swaggerOptions: SwaggerOptions =  {
         swagger: {

@@ -9,7 +9,6 @@ import fastifySensible from "@fastify/sensible";
  * @see https://github.com/fastify/fastify-sensible
  */
 const sensiblePlugin: FastifyPluginAsync = async (fastify: FastifyInstance) =>  {
-    console.log('loading sensible plugin')
     await fastify.register(fastifySensible, {})
 }
 
