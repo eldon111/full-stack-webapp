@@ -21,18 +21,23 @@ const oauthPlugin: FastifyPluginAsync = async (fastify: FastifyInstance) => {
         scope: ['profile'],
         credentials: {
             client: {
-                id: await accessSecretVersion( 'projects/622349036584/secrets/oauth-client-id/versions/latest'),
-                secret: await accessSecretVersion( 'projects/622349036584/secrets/oauth-client-secret/versions/latest'),
+                id: await accessSecretVersion('projects/622349036584/secrets/oauth-client-id/versions/latest'),
+                secret: await accessSecretVersion('projects/622349036584/secrets/oauth-client-secret/versions/latest'),
             },
             auth: fastifyOauth2.GOOGLE_CONFIGURATION
         },
         // register a fastify url to start the redirect flow to the service provider's OAuth2 login
         startRedirectPath: '/login/google',
         // service provider redirects here after user login
-        callbackUri: 'http://localhost:3000/login/google/callback'
+        // callbackUri: 'http://localhost:3000/login/google/callback'
         // You can also define callbackUri as a function that takes a FastifyRequest and returns a string
-        // callbackUri: req => `${req.protocol}://${req.hostname}/login/google/callback`
-        // callbackUri: req => `${req.protocol}://${req.hostname}:${req.port}/login/google/callback`
+        callbackUri: req => {
+            console.log(req.protocol, req.hostname, req.port)
+            return req.port
+                ? `${req.protocol}://${req.hostname}:${req.port}/login/google/callback`
+                : `${req.protocol}://${req.hostname}/login/google/callback`
+
+        }
     })
 
     fastify.get('/login/google/callback', function (request, reply) {
