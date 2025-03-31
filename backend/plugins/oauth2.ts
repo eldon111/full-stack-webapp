@@ -16,7 +16,7 @@ const oauthPlugin: FastifyPluginAsync = async (fastify: FastifyInstance) => {
         return version.payload.data.toString('utf8');
     }
 
-    fastify.register(fastifyOauth2, {
+    await fastify.register(fastifyOauth2, {
         name: 'googleOAuth2',
         scope: ['profile'],
         credentials: {
@@ -32,7 +32,6 @@ const oauthPlugin: FastifyPluginAsync = async (fastify: FastifyInstance) => {
         // callbackUri: 'http://localhost:3000/login/google/callback'
         // You can also define callbackUri as a function that takes a FastifyRequest and returns a string
         callbackUri: req => {
-            console.log(req.protocol, req.hostname, req.port)
             return req.port
                 ? `${req.protocol}://${req.hostname}:${req.port}/login/google/callback`
                 : `${req.protocol}://${req.hostname}/login/google/callback`
