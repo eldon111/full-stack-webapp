@@ -30,6 +30,22 @@ const storagePlugin: FastifyPluginAsync = fastifyPlugin(async function (fastify:
     });
 
     // Method to read a file from a specified bucket
+    fastify.decorate('listFiles', async (namespace: string): Promise<string[]> => {
+        try {
+            const options = {
+                prefix: namespace,
+            };
+
+            const bucket = getBucketByName(IMAGE_BUCKET_NAME);
+            const [files] = await bucket.getFiles(options);
+            return files.map(file => file.name);
+        } catch (error) {
+            fastify.log.error(`Error reading file from bucket: ${error}`);
+            throw error;
+        }
+    });
+
+    // Method to read a file from a specified bucket
     fastify.decorate('readFromStorage', async (fileName: string): Promise<Buffer> => {
         try {
             const bucket = getBucketByName(IMAGE_BUCKET_NAME);
@@ -47,6 +63,7 @@ const storagePlugin: FastifyPluginAsync = fastifyPlugin(async function (fastify:
 declare module 'fastify' {
     interface FastifyInstance {
         uploadToStorage(filePath: string, destination: string): Promise<string>;
+        listFiles(namespace: string): Promise<string[]>;
         readFromStorage(fileName: string): Promise<Buffer>;
     }
 }

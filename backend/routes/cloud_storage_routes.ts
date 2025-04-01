@@ -60,6 +60,18 @@ const storageRoutes: FastifyPluginAsync = async (fastify: FastifyInstance) => {
         }
     });
 
+    // Read a list of files from Google Cloud Storage
+    fastify.get('/storage/image/list', async (request, reply) => {
+        try {
+            const namespace = '' // TODO: replace with user identifier
+
+            reply.send(await fastify.listFiles(namespace));
+        } catch (error: any) {
+            fastify.log.error(error);
+            reply.status(500).send({ error: error.message || 'An error occurred while reading the file from storage' });
+        }
+    });
+
     // Read a file from Google Cloud Storage
     fastify.get('/storage/image/read', async (request, reply) => {
         try {
