@@ -8,6 +8,7 @@ const {SecretManagerServiceClient} = require('@google-cloud/secret-manager').v1
 const secretManagerClient = new SecretManagerServiceClient();
 
 const oauthPlugin: FastifyPluginAsync = async (fastify: FastifyInstance) => {
+    console.log('loading oauth plugin')
 
     async function accessSecretVersion(name: String) {
         const [version] = await secretManagerClient.accessSecretVersion({

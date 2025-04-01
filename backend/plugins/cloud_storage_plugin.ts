@@ -5,7 +5,9 @@ import {Bucket, GetSignedUrlConfig, Storage} from '@google-cloud/storage';
 import fastifyPlugin from "fastify-plugin";
 
 const storagePlugin: FastifyPluginAsync = fastifyPlugin(async function (fastify: FastifyInstance) {
-    const IMAGE_BUCKET_NAME = 'eldons-full-stack-webapp-images';
+  console.log('loading cloud storage plugin')
+
+  const IMAGE_BUCKET_NAME = 'eldons-full-stack-webapp-images';
 
   // Initialize Google Cloud Storage Client
   const storage = new Storage();
