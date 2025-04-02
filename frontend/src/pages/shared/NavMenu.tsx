@@ -19,7 +19,7 @@ function NavMenu() {
                 <NavigationMenuLink href="/login">Log In</NavigationMenuLink>
             </NavigationMenuItem>
             <NavigationMenuItem className={navigationMenuTriggerStyle()}>
-                <NavigationMenuLink href="/logout">Log Out</NavigationMenuLink>
+                <NavigationMenuLink href={`${import.meta.env.VITE_REACT_APP_API_BASE_URL}/logout`}>Log Out</NavigationMenuLink>
             </NavigationMenuItem>
 
             {/*<NavigationMenuIndicator></NavigationMenuIndicator>*/}

@@ -4,10 +4,12 @@ import path from "node:path"
 import AutoLoad from "@fastify/autoload"
 import {FastifyInstance, FastifyPluginAsync} from "fastify"
 import cors from "@fastify/cors";
-import {fastifyTRPCPlugin, FastifyTRPCPluginOptions} from "@trpc/server/adapters/fastify";
-import {AppRouter, appRouter} from "./routes/router";
-import {createContext} from "./routes/context";
 import closeWithGrace from "close-with-grace";
+
+import secureSession from "@fastify/secure-session";
+import fastifyCookie from "@fastify/cookie";
+import {Token} from "@fastify/oauth2";
+import {accessSecretAsBuffer} from "./utils/secretManagement";
 
 const appService: FastifyPluginAsync = async (server: FastifyInstance) => {
 
@@ -19,13 +21,28 @@ const appService: FastifyPluginAsync = async (server: FastifyInstance) => {
     await server.close()
   })
 
+  server.register(fastifyCookie); // Required for sessions
+
+  server.register(secureSession, {
+    key: await accessSecretAsBuffer('secure-session-key'),
+    expiry: 24 * 60 * 60, // Default 1 day
+    cookie: {
+      path: '/'
+    }
+  })
+
   server.register(cors, {
+    credentials: true,
     origin: (origin, cb) => {
-      server.log.info(origin)
-      if (!origin) return cb(new Error("Not allowed"), false)
+      server.log.info('CORS origin: ', origin)
+      if (!origin) {
+        // TODO: better handling of missing origin
+        // return cb(new Error("Not allowed"), false)
+        return cb(null, true)
+      }
       const hostname = new URL(origin).hostname
       if (hostname === "localhost") {
-        server.log.info('localhost')
+        server.log.info('localhost, no CORS protection')
         //  Request from localhost will pass
         cb(null, true)
       } else {
@@ -33,18 +50,6 @@ const appService: FastifyPluginAsync = async (server: FastifyInstance) => {
         cb(new Error("Not allowed"), false)
       }
     },
-  })
-
-  server.register(fastifyTRPCPlugin, {
-    prefix: '/trpc',
-    trpcOptions: {
-      router: appRouter,
-      createContext,
-      onError({path, error}) {
-        // report to error monitoring
-        console.error(`Error in tRPC handler on path '${path}':`, error);
-      },
-    } satisfies FastifyTRPCPluginOptions<AppRouter>['trpcOptions'],
   })
 
   // Do not touch the following lines
@@ -63,6 +68,13 @@ const appService: FastifyPluginAsync = async (server: FastifyInstance) => {
     dir: path.join(__dirname, 'routes'),
     options: Object.assign({})
   })
+}
+
+declare module '@fastify/secure-session' {
+  interface SessionData {
+    accessToken?: Token;
+    userInfo?: any;
+  }
 }
 
 export default appService

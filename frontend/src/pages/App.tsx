@@ -5,21 +5,34 @@ import {Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious}
 function App() {
 
   const [urls, setUrls] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   useEffect(() => {
     const fetchUrls = async () => {
-      const response = await fetch(`${import.meta.env.VITE_REACT_APP_API_BASE_URL}/storage/image/list`);
+      const response = await fetch(`${import.meta.env.VITE_REACT_APP_API_BASE_URL}/storage/image/list`, {credentials: 'include'});
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        setIsLoading(false);
+        return;
       }
       const json = await response.json();
       setUrls(json);
+      setIsLoading(false);
+      setIsLoggedIn(true);
     };
     fetchUrls();
   }, []);
 
-  if (urls.length === 0) {
+  if (isLoading) {
     return <div>Loading...</div>
+  }
+
+  if (!isLoggedIn) {
+    return <div>Login to view images</div>
+  }
+
+  if (urls.length === 0) {
+    return <div>No images</div>
   }
 
   return (

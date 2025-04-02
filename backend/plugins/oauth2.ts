@@ -1,75 +1,73 @@
 'use strict'
 
-import sget from 'simple-get';
 import {FastifyInstance, FastifyPluginAsync} from "fastify";
 import fastifyOauth2, {OAuth2Namespace} from "@fastify/oauth2";
-
-const {SecretManagerServiceClient} = require('@google-cloud/secret-manager').v1
-const secretManagerClient = new SecretManagerServiceClient();
+import {getCurrentToken} from "../utils/authenticationGuardMiddleware";
+import {accessSecret} from "../utils/secretManagement";
 
 const oauthPlugin: FastifyPluginAsync = async (fastify: FastifyInstance) => {
-    console.log('loading oauth plugin')
+  console.log('loading oauth plugin')
 
-    async function accessSecretVersion(name: String) {
-        const [version] = await secretManagerClient.accessSecretVersion({
-            name: name,
-        });
-        return version.payload.data.toString('utf8');
+  await fastify.register(fastifyOauth2, {
+    name: 'googleOAuth2',
+    scope: ['profile', 'email'],
+    credentials: {
+      client: {
+        id: await accessSecret('oauth-client-id'),
+        secret: await accessSecret('oauth-client-secret'),
+      }
+    },
+    discovery: {
+      issuer: 'https://accounts.google.com'
+    },
+    callbackUri: req => {
+      return req.port
+        ? `${req.protocol}://${req.hostname}:${req.port}/login/google/callback`
+        : `${req.protocol}://${req.hostname}/login/google/callback`
     }
+  })
 
-    await fastify.register(fastifyOauth2, {
-        name: 'googleOAuth2',
-        scope: ['profile'],
-        credentials: {
-            client: {
-                id: await accessSecretVersion('projects/622349036584/secrets/oauth-client-id/versions/latest'),
-                secret: await accessSecretVersion('projects/622349036584/secrets/oauth-client-secret/versions/latest'),
-            },
-            auth: fastifyOauth2.GOOGLE_CONFIGURATION
-        },
-        // register a fastify url to start the redirect flow to the service provider's OAuth2 login
-        startRedirectPath: '/login/google',
-        // service provider redirects here after user login
-        // callbackUri: 'http://localhost:3000/login/google/callback'
-        // You can also define callbackUri as a function that takes a FastifyRequest and returns a string
-        callbackUri: req => {
-            return req.port
-                ? `${req.protocol}://${req.hostname}:${req.port}/login/google/callback`
-                : `${req.protocol}://${req.hostname}/login/google/callback`
+  fastify.get('/login/google', {cors: false}, async (request, reply) => {
+    reply.redirect(await fastify.googleOAuth2.generateAuthorizationUri(request, reply));
+  });
 
-        }
+  fastify.get('/login/google/callback', function (request, reply) {
+    this.googleOAuth2.getAccessTokenFromAuthorizationCodeFlow(request, (err: any, result: any) => {
+      if (err) {
+        reply.send(err)
+        return
+      }
+
+      request.session.set('accessToken', result.token);
+
+      this.googleOAuth2.userinfo(result.token, (err: any, userinfo: Object) => {
+        console.log('userInfo: ', userinfo)
+        request.session.set('userInfo', userinfo)
+        // TODO: stop hard-coding
+        reply.redirect('http://localhost:5173/')
+      })
     })
+  })
 
-    fastify.get('/login/google/callback', function (request, reply) {
-        this.googleOAuth2.getAccessTokenFromAuthorizationCodeFlow(request, (err:any, result:any) => {
-            if (err) {
-                reply.send(err)
-                return
-            }
-
-            sget.concat({
-                url: 'https://www.googleapis.com/oauth2/v2/userinfo',
-                method: 'GET',
-                headers: {
-                    Authorization: 'Bearer ' + result.token.access_token
-                },
-                json: true
-            }, function (err, _res, data) {
-                if (err) {
-                    reply.send(err)
-                    return
-                }
-                reply.send(data)
-            })
-        })
-    })
+  fastify.get('/logout', {cors: false}, async (request, reply) => {
+    request.session.delete()
+    const token = getCurrentToken(request);
+    if (!token) return reply.redirect(request.headers.referer || '/');
+    await fastify.googleOAuth2.revokeToken(token, 'access_token', undefined)
+    // TODO: stop hard-coding
+    reply.redirect('http://localhost:5173/')
+  });
 }
 
 //Declare types for the plugin
 declare module 'fastify' {
-    interface FastifyInstance {
-        googleOAuth2: OAuth2Namespace;
-    }
+  interface FastifyInstance {
+    googleOAuth2: OAuth2Namespace;
+  }
+
+  interface RouteShorthandOptions {
+    cors?: boolean;
+  }
 }
 
 export default oauthPlugin
