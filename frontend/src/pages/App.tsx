@@ -1,55 +1,84 @@
 import './App.css'
-import {useEffect, useState} from "react";
-import {Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious} from "@/components/ui/carousel.tsx";
+import {QueryClient, QueryClientProvider} from "@tanstack/react-query";
+import {BrowserRouter, Route, Routes} from "react-router";
+import NavMenu from "@/pages/shared/NavMenu.tsx";
+import Upload from "@/pages/Upload.tsx";
+import Login from "@/pages/Login.tsx";
+import Home from "@/pages/Home.tsx";
+import {TRPCProvider} from "@/utils/trpc.ts";
+import {useState} from "react";
+import {createTRPCClient, httpLink, TRPCClientErrorLike} from "@trpc/client";
+import type {AppRouter} from '../../../backend/routes/router.ts';
+
+function makeQueryClient() {
+  return new QueryClient({
+    defaultOptions: {
+      queries: {
+        staleTime: 60 * 1000,
+        retry: (failureCount, _err) => {
+          const err = _err as never as TRPCClientErrorLike<AppRouter>;
+          const MAX_QUERY_RETRIES = 3;
+
+          // Prevent retries if the error is a 4xx
+          const status = err?.data?.httpStatus ?? 0;
+          if (status >= 400 && status < 500) {
+            return false;
+          }
+          return failureCount < MAX_QUERY_RETRIES;
+        },
+      },
+    },
+  });
+}
+
+let browserQueryClient: QueryClient | undefined = undefined;
+
+function getQueryClient() {
+  if (typeof window === 'undefined') {
+    // Server: always make a new query client
+    return makeQueryClient();
+  } else {
+    // Browser: make a new query client if we don't already have one
+    // This is very important, so we don't re-make a new client if React
+    // suspends during the initial render. This may not be needed if we
+    // have a suspense boundary BELOW the creation of the query client
+    if (!browserQueryClient) browserQueryClient = makeQueryClient();
+    return browserQueryClient;
+  }
+}
 
 function App() {
 
-  const [urls, setUrls] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-
-  useEffect(() => {
-    const fetchUrls = async () => {
-      const response = await fetch(`${import.meta.env.VITE_REACT_APP_API_BASE_URL}/storage/image/list`, {credentials: 'include'});
-      if (!response.ok) {
-        setIsLoading(false);
-        return;
-      }
-      const json = await response.json();
-      setUrls(json);
-      setIsLoading(false);
-      setIsLoggedIn(true);
-    };
-    fetchUrls();
-  }, []);
-
-  if (isLoading) {
-    return <div>Loading...</div>
-  }
-
-  if (!isLoggedIn) {
-    return <div>Login to view images</div>
-  }
-
-  if (urls.length === 0) {
-    return <div>No images</div>
-  }
+  const queryClient = getQueryClient();
+  const [trpcClient] = useState(() =>
+    createTRPCClient<AppRouter>({
+      links: [
+        httpLink({
+          url: 'http://localhost:3000/api',
+          fetch(url, options) {
+            return fetch(url, {
+              ...options,
+              credentials: 'include',
+            });
+          },
+        }),
+      ],
+    }),
+  );
 
   return (
-    <div className="flex flex-col min-h-svh">
-      <Carousel opts={{ loop: true }}>
-        <CarouselContent>
-          {
-            urls.map(url =>
-              <CarouselItem key={url} className={'basis-1/3'}>
-                <img src={url} alt={url} />
-              </CarouselItem>)
-          }
-        </CarouselContent>
-        <CarouselPrevious/>
-        <CarouselNext/>
-      </Carousel>
-    </div>
+    <QueryClientProvider client={queryClient}>
+      <TRPCProvider trpcClient={trpcClient} queryClient={queryClient}>
+        <BrowserRouter>
+          <NavMenu/>
+          <Routes>
+            <Route path="/" element={<Home/>}/>
+            <Route path="/upload" element={<Upload/>}/>
+            <Route path="/login" element={<Login/>}/>
+          </Routes>
+        </BrowserRouter>
+      </TRPCProvider>
+    </QueryClientProvider>
   )
 }
 

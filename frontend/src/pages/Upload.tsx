@@ -1,4 +1,4 @@
-import {StrictMode, useEffect, useState} from 'react'
+import {StrictMode, useState} from 'react'
 import '../index.css'
 import {
   Dropzone,
@@ -10,76 +10,100 @@ import {
   DropzoneZone
 } from "@/components/ui/dropzone.tsx";
 import {DropEvent} from "react-dropzone";
+import {useQuery} from "@tanstack/react-query";
+import {useTRPC, useTRPCClient} from "@/utils/trpc.ts";
+import axios from 'axios';
+import {Progress} from "@/components/ui/progress.tsx";
+
+type UploadProgress = Record<string, { progress: number }>
 
 function Upload() {
 
-  const [isLoading, setIsLoading] = useState(true);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const trpc = useTRPC();
+  const trpcClient = useTRPCClient();
+  const loggedInQuery = useQuery(trpc.users.loggedIn.queryOptions());
 
-  useEffect(() => {
-    const checkLoggedInStatus = async () => {
-      // TODO: create user info endpoint
-      const response = await fetch(`${import.meta.env.VITE_REACT_APP_API_BASE_URL}/storage/image/list`, {credentials: 'include'});
-      setIsLoading(false)
-      if (!response.ok) {
-        return;
-      }
-      setIsLoggedIn(true);
-    };
-    checkLoggedInStatus();
-  }, []);
+  // const [uploads, setUploads] = useState<Map<string, number>>(new Map());
+  const [uploads, setUploads] = useState<UploadProgress>({});
 
-  async function handleFilesUploaded<T extends File>(files: T[], event: DropEvent): Promise<void> {
-    console.log('event:', event)
+  const updateData = (filename: string, value: number) => {
+    setUploads(prevData =>  ({
+      ...prevData,
+      [filename]: { progress: value }
+    }));
+  };
 
-    const formData = new FormData();
-    files.forEach(file => formData.append('files', file));
-
-    const response = await fetch(`${import.meta.env.VITE_REACT_APP_API_BASE_URL}/storage/image/upload`, {
-      method: 'POST',
-      body: formData,
-      credentials: 'include',
-    });
-
-    if (!response.ok) {
-      console.error('Error uploading file.');
-      return
-    }
-
-    const result: { message: string; fileName: string; destination: string } = await response.json();
-    console.log('File upload result:', result);
-  }
-
-  if (isLoading) {
+  if (loggedInQuery.isLoading) {
     return <div>Loading...</div>
   }
 
-  if (!isLoggedIn) {
+  if (loggedInQuery.data === false) {
     return <div>Login to upload images</div>
+  }
+
+  const handleFilesUploaded = async function <T extends File>(files: T[], event: DropEvent) {
+    console.log('event:', event);
+
+    const progresses: UploadProgress = Object.fromEntries(files.map(file => [file.name, {progress: 0}]));
+    setUploads(progresses);
+
+    const promises: Promise<void>[] = files.map(
+      async file => {
+        const uploadUrl = await trpcClient.image.uploadUrl.query({filename: file.name});
+        axios.put(uploadUrl, await file.arrayBuffer(), {
+          headers: {
+            'Content-Type': file.type,
+          },
+          onUploadProgress: (progressEvent) => {
+            updateData(file.name, (progressEvent.progress ?? 0) * 100);
+          },
+        })
+          .then(response => {
+            console.log('File upload response:', response);
+          })
+          .catch(error => {
+            console.error(`Error uploading file ${file.name}: ${error.message}`);
+          })
+      }
+    )
+
+    await Promise.all(promises);
   }
 
   return (
     <StrictMode>
-      <Dropzone
-        accept={{
-          "image/*": [".jpg", ".jpeg", ".png", ".webp"],
-        }}
-        multiple={true}
-        onDropAccepted={handleFilesUploaded}
-      >
-        <DropzoneZone>
-          <DropzoneInput/>
-          <DropzoneGroup className="gap-4">
-            <DropzoneUploadIcon/>
-            <DropzoneGroup>
-              <DropzoneTitle>Drop files here or click to upload</DropzoneTitle>
-              <DropzoneDescription>
-                You can upload files up to 10MB in size. Supported formats: JPG, PNG
-              </DropzoneDescription>
-            </DropzoneGroup>
-          </DropzoneGroup>
-        </DropzoneZone>
-      </Dropzone>
+      <div className={'flex flex-col items-center gap-4 w-1/3'}>
+        <div className={'flex flex-row'}>
+          <Dropzone
+            accept={{
+              "image/*": [".jpg", ".jpeg", ".png", ".webp"],
+            }}
+            multiple={true}
+            onDropAccepted={handleFilesUploaded}
+          >
+            <DropzoneZone>
+              <DropzoneInput/>
+              <DropzoneGroup className="gap-4">
+                <DropzoneUploadIcon/>
+                <DropzoneGroup>
+                  <DropzoneTitle>Drop files here or click to upload</DropzoneTitle>
+                  <DropzoneDescription>
+                    You can upload files up to 10MB in size. Supported formats: JPG, PNG
+                  </DropzoneDescription>
+                </DropzoneGroup>
+              </DropzoneGroup>
+            </DropzoneZone>
+          </Dropzone>
+        </div>
+        {Object.entries(uploads).map(([filename, {progress}]) =>
+          <div key={filename} className={'flex flex-row w-full'}>
+            <div className={'flex flex-col w-full items-start'}>
+              <span>{filename}</span>
+              <Progress value={progress}/>
+            </div>
+          </div>
+        )}
+      </div>
     </StrictMode>
   )
 }

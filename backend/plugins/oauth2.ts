@@ -6,7 +6,7 @@ import {getCurrentToken} from "../utils/authenticationGuardMiddleware";
 import {accessSecret} from "../utils/secretManagement";
 
 const oauthPlugin: FastifyPluginAsync = async (fastify: FastifyInstance) => {
-  console.log('loading oauth plugin')
+  console.log('loading oauth2 plugin')
 
   await fastify.register(fastifyOauth2, {
     name: 'googleOAuth2',
@@ -50,10 +50,10 @@ const oauthPlugin: FastifyPluginAsync = async (fastify: FastifyInstance) => {
   })
 
   fastify.get('/logout', {cors: false}, async (request, reply) => {
-    request.session.delete()
     const token = getCurrentToken(request);
     if (!token) return reply.redirect(request.headers.referer || '/');
-    await fastify.googleOAuth2.revokeToken(token, 'access_token', undefined)
+    await fastify.googleOAuth2.revokeToken(token, 'access_token', undefined);
+    request.session.delete();
     // TODO: stop hard-coding
     reply.redirect('http://localhost:5173/')
   });

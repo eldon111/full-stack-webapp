@@ -7,6 +7,7 @@ import multipart from "@fastify/multipart";
 import {promisify} from "util";
 import {pipeline} from "stream";
 import {authenticationGuard} from "../utils/authenticationGuardMiddleware";
+import {generateImageURLs} from "../plugins/imageStorage";
 
 // Promisify the pipeline method for handling file streams.
 const pump = promisify(pipeline);
@@ -67,12 +68,7 @@ const storageRoutes: FastifyPluginAsync = async (fastify: FastifyInstance) => {
     {preHandler: [authenticationGuard]},
     async (request, reply) => {
       try {
-        const filenames = await fastify.listFiles(getNamespace(request))
-        const urls = Promise.all(
-          filenames.map(async fn => await fastify.generateImageUrl(fn))
-        );
-
-        reply.send(await urls);
+        reply.send(await generateImageURLs(request.session.get('userInfo')))
       } catch (error: any) {
         fastify.log.error(error);
         reply.status(500).send({error: error.message || 'An error occurred while reading the file from storage'});
