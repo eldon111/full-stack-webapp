@@ -1,10 +1,16 @@
 {
+  "name": "generate-thumbnail",
+  "version": "1.0.0",
+  "main": "dist/generateThumbnail.js",
+  "scripts": {
+    "build": "tsc"
+  },
   "dependencies": {
     "@google-cloud/functions-framework": "^3.5.1",
+    "@google-cloud/storage": "^7.16.0",
     "sharp": "^0.33.5"
   },
   "devDependencies": {
-    "@google-cloud/storage": "^7.16.0",
     "typescript": "^5.8.2"
   }
 }
