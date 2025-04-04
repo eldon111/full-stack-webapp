@@ -7,7 +7,7 @@ import Login from "@/pages/Login.tsx";
 import Home from "@/pages/Home.tsx";
 import {TRPCProvider} from "@/utils/trpc.ts";
 import {useState} from "react";
-import {createTRPCClient, httpLink, TRPCClientErrorLike} from "@trpc/client";
+import {createTRPCClient, createWSClient, httpLink, splitLink, TRPCClientErrorLike, wsLink} from "@trpc/client";
 import type {AppRouter} from '../../../backend/routes/router.ts';
 
 function makeQueryClient() {
@@ -50,17 +50,29 @@ function getQueryClient() {
 function App() {
 
   const queryClient = getQueryClient();
+  const wsClient = createWSClient({
+    url: 'ws://localhost:3000/api',
+    onError(err) {
+      console.error(err);
+    }
+  });
   const [trpcClient] = useState(() =>
     createTRPCClient<AppRouter>({
       links: [
-        httpLink({
-          url: 'http://localhost:3000/api',
-          fetch(url, options) {
-            return fetch(url, {
-              ...options,
-              credentials: 'include',
-            });
+        splitLink({
+          condition(op) {
+            return op.type === 'subscription';
           },
+          true: wsLink({ client: wsClient }),
+          false: httpLink({
+            url: 'http://localhost:3000/api',
+            fetch(url, options) {
+              return fetch(url, {
+                ...options,
+                credentials: 'include',
+              });
+            },
+          }),
         }),
       ],
     }),

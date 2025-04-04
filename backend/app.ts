@@ -13,6 +13,7 @@ import {accessSecretAsBuffer} from "./utils/secretManagement";
 import {fastifyTRPCPlugin, FastifyTRPCPluginOptions} from "@trpc/server/adapters/fastify";
 import {AppRouter, appRouter} from "./routes/router";
 import {createContext} from "./trpc";
+import ws from '@fastify/websocket';
 
 const appService: FastifyPluginAsync = async (server: FastifyInstance) => {
 
@@ -32,10 +33,13 @@ const appService: FastifyPluginAsync = async (server: FastifyInstance) => {
     cookie: {
       path: '/'
     }
-  })
+  });
+
+  server.register(ws);
 
   server.register(fastifyTRPCPlugin, {
     prefix: '/api',
+    useWSS: true,
     trpcOptions: {
       router: appRouter,
       createContext,

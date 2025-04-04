@@ -27,11 +27,11 @@ const isAuthenticated = t.middleware(opts => {
 });
 
 function getCurrentToken(request: FastifyRequest): Token | undefined {
-  return (request.session.get('accessToken') as unknown as Token | undefined);
+  return (request.session?.get('accessToken') as unknown as Token | undefined);
 }
 
 function getCurrentUserInfo(request: FastifyRequest): UserInfo | undefined {
-  return request.session.get('userInfo');
+  return request.session?.get('userInfo');
 }
 
 export function createContext({req, res}: CreateFastifyContextOptions) {
