@@ -1,0 +1,60 @@
+import {CloudEventV1} from "cloudevents/dist/event/interfaces";
+import {Storage} from "@google-cloud/storage";
+import sharp from "sharp";
+import path from 'path'
+
+// can't use import with this or it doesn't work
+const functions = require('@google-cloud/functions-framework');
+
+const TARGET_WIDTH = 320;
+const TARGET_HEIGHT = 240;
+
+const storage = new Storage();
+
+// Register a CloudEvent callback with the Functions Framework that will
+// be triggered by Cloud Storage.
+functions.cloudEvent('generateThumbnail', async (cloudEvent: CloudEventV1<any>) => {
+  if (!cloudEvent.data) {
+    return;
+  }
+
+  const fileInfo = cloudEvent.data;
+  await process(fileInfo.bucket, fileInfo.name);
+});
+
+async function process(bucket: string, filename: string) {
+  const dirname = path.dirname(filename);
+  if (path.basename(dirname) === 'thumbnails') {
+    console.log(`skipping thumbnail ${filename}`);
+    return;
+  }
+
+  const newDir = `${dirname}/thumbnails`;
+  const ext = path.extname(filename);
+  const basename = path.basename(filename, ext);
+  const newFilename = `${newDir}/${basename}_thumb.webp`
+
+  const [buffer] = await storage
+    .bucket(bucket)
+    .file(filename)
+    .download()
+
+  await resizeImage(buffer)
+    .then(function (data) {
+      storage.bucket(bucket).file(newFilename).save(data)
+    });
+
+  console.log("Done");
+}
+
+export async function resizeImage(buffer: Buffer | string): Promise<Buffer<ArrayBufferLike>> {
+  return await sharp(buffer)
+    .resize({
+      fit: sharp.fit.cover,
+      position: sharp.strategy.attention,
+      width: TARGET_WIDTH,
+      height: TARGET_HEIGHT,
+    })
+    .webp()
+    .toBuffer();
+}
