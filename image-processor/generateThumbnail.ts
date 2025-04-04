@@ -2,14 +2,18 @@ import {CloudEventV1} from "cloudevents/dist/event/interfaces";
 import {Storage} from "@google-cloud/storage";
 import sharp from "sharp";
 import path from 'path'
+import {PubSub} from "@google-cloud/pubsub";
 
-// can't use import with this or it doesn't work
+// can't use import with this, or it doesn't work
 const functions = require('@google-cloud/functions-framework');
 
 const TARGET_WIDTH = 320;
 const TARGET_HEIGHT = 240;
 
 const storage = new Storage();
+const pubsub = new PubSub({projectId: 'avian-presence-455118-j3'});
+const topic = pubsub.topic('thumbnail-created');
+console.log(`Topic ${topic.name} accessed.`);
 
 // Register a CloudEvent callback with the Functions Framework that will
 // be triggered by Cloud Storage.
@@ -43,6 +47,15 @@ async function process(bucket: string, filename: string) {
     .then(function (data) {
       storage.bucket(bucket).file(newFilename).save(data)
     });
+
+  try {
+    const messageId = await topic.publishMessage({data: Buffer.from(filename)});
+    console.log(`Message ${messageId} published.`);
+  } catch (error) {
+    console.error(
+      `Received error while publishing: ${(error as Error).message}`
+    );
+  }
 
   console.log("Done");
 }
