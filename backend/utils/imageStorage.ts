@@ -13,11 +13,11 @@ function getBucketByName(bucketName: string): Bucket {
 }
 
 function getImageNamespace(userInfo: UserInfo): string {
-  return `uploads/${userInfo.email}`;
+  return `${userInfo.email}/uploads`;
 }
 
 function getThumbnailNamespace(userInfo: UserInfo): string {
-  return `uploads/${userInfo.email}/thumbnails`;
+  return `${userInfo.email}/thumbnails`;
 }
 
 async function listFilenames(namespace: string): Promise<string[]> {

@@ -33,8 +33,7 @@ async function process(bucket: string, filename: string) {
     return;
   }
 
-  // const newDir = `${dirname}/thumbnails`;
-  const newDir = dirname.replace('uploads/','thumbnails/');
+  const newDir = dirname.replace('/uploads','/thumbnails');
   const oldExt = path.extname(filename);
   const basename = path.basename(filename, oldExt);
   const newFilename = `${newDir}/${basename}.webp`
