@@ -1,12 +1,15 @@
 'use strict'
 
-import {FastifyInstance, FastifyPluginAsync} from "fastify";
-import fastifyOauth2, {OAuth2Namespace} from "@fastify/oauth2";
-import {getCurrentToken} from "../utils/authenticationGuardMiddleware";
+import {FastifyInstance, FastifyRequest} from "fastify";
+import fastifyOauth2, {OAuth2Namespace, Token} from "@fastify/oauth2";
 import {accessSecret} from "../utils/secretManagement";
 
-const oauthPlugin: FastifyPluginAsync = async (fastify: FastifyInstance) => {
-  console.log('loading oauth2 plugin')
+async function oauthPlugin(fastify: FastifyInstance) {
+  console.log('loading oauth2 plugin');
+
+  function getCurrentToken(request: FastifyRequest): Token | undefined {
+    return (request.session.get('accessToken') as unknown as Token | undefined);
+  }
 
   await fastify.register(fastifyOauth2, {
     name: 'googleOAuth2',

@@ -40,7 +40,7 @@ function Upload() {
   };
 
   useEffect(() => {
-    const subscription = trpcClient.waitForThumbnail.subscribe(undefined, {
+    const subscription = trpcClient.image.waitForThumbnail.subscribe(undefined, {
       onData: (filename: string) => {
         console.log("got data from thumbnail subscription:", filename);
         updateThumbnailComplete(filename, true);

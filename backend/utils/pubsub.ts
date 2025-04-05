@@ -4,20 +4,20 @@ import {PubSub} from "@google-cloud/pubsub";
 
 const pubsub = new PubSub({projectId: 'avian-presence-455118-j3'});
 
-const listeners: {[key: string]: (filename: string) => void} = {};
+const thumbnailCreatedListeners: {[key: string]: (filename: string) => void} = {};
 
-const subscription = pubsub.subscription('thumbnail-created-sub');
-subscription.on('message', message => {
-  for (const listener of Object.values(listeners)) {
+const thumbnailCreatedSubscription = pubsub.subscription('thumbnail-created-sub');
+thumbnailCreatedSubscription.on('message', message => {
+  for (const listener of Object.values(thumbnailCreatedListeners)) {
     listener(message.data.toString());
   }
   message.ack();
 });
 
 export function listenToThumbnailCreated(id: string, listener: (filename: string) => void) {
-  listeners[id] = listener;
+  thumbnailCreatedListeners[id] = listener;
 }
 
 export function stopListeningToThumbnailCreated(id: string) {
-  delete listeners[id];
+  delete thumbnailCreatedListeners[id];
 }
