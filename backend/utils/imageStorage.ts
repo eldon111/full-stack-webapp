@@ -1,7 +1,6 @@
 import {Bucket, GetSignedUrlConfig, Storage} from "@google-cloud/storage";
 import {UserInfo} from "../trpc";
 import path from "node:path";
-import {negate} from "./functionUtils";
 
 const IMAGE_BUCKET_NAME = 'eldons-full-stack-webapp-images';
 
@@ -13,8 +12,12 @@ function getBucketByName(bucketName: string): Bucket {
   return storage.bucket(bucketName);
 }
 
-function getNamespace(userInfo: UserInfo): string {
+function getImageNamespace(userInfo: UserInfo): string {
   return `uploads/${userInfo.email}`;
+}
+
+function getThumbnailNamespace(userInfo: UserInfo): string {
+  return `uploads/${userInfo.email}/thumbnails`;
 }
 
 async function listFilenames(namespace: string): Promise<string[]> {
@@ -50,23 +53,21 @@ function isThumbnail(filename: string) {
 }
 
 export async function generateImageURLs(userInfo: UserInfo): Promise<string[]> {
-  const filenames = await listFilenames(getNamespace(userInfo))
+  const filenames = await listFilenames(getImageNamespace(userInfo))
   return Promise.all(
     filenames
-      .filter(negate(isThumbnail))
       .map(async filename => await generateImageUrl(filename, 'read'))
   );
 }
 
 export async function generateThumbnailURLs(userInfo: UserInfo): Promise<string[]> {
-  const filenames = await listFilenames(getNamespace(userInfo))
+  const filenames = await listFilenames(getThumbnailNamespace(userInfo))
   return Promise.all(
     filenames
-      .filter(isThumbnail)
       .map(async filename => await generateImageUrl(filename, 'read'))
   );
 }
 
 export async function generateImageUploadUrl(userInfo: UserInfo, filename: string): Promise<string> {
-  return await generateImageUrl(`${getNamespace(userInfo)}/${filename}`, 'write')
+  return await generateImageUrl(`${getImageNamespace(userInfo)}/${filename}`, 'write')
 }

@@ -28,15 +28,16 @@ functions.cloudEvent('generateThumbnail', async (cloudEvent: CloudEventV1<any>) 
 
 async function process(bucket: string, filename: string) {
   const dirname = path.dirname(filename);
-  if (path.basename(dirname) === 'thumbnails') {
+  if (dirname.includes('thumbnails')) {
     console.log(`skipping thumbnail ${filename}`);
     return;
   }
 
-  const newDir = `${dirname}/thumbnails`;
-  const ext = path.extname(filename);
-  const basename = path.basename(filename, ext);
-  const newFilename = `${newDir}/${basename}_thumb.webp`
+  // const newDir = `${dirname}/thumbnails`;
+  const newDir = dirname.replace('uploads/','thumbnails/');
+  const oldExt = path.extname(filename);
+  const basename = path.basename(filename, oldExt);
+  const newFilename = `${newDir}/${basename}.webp`
 
   const [buffer] = await storage
     .bucket(bucket)
