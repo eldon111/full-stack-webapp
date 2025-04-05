@@ -47,15 +47,22 @@ function getQueryClient() {
   }
 }
 
-function App() {
+let wsClient: ReturnType<typeof createWSClient> | undefined = undefined;
 
-  const queryClient = getQueryClient();
-  const wsClient = createWSClient({
+function getWSClient() {
+  if (!wsClient) wsClient = createWSClient({
     url: 'ws://localhost:3000/api',
     onError(err) {
       console.error(err);
     }
   });
+  return wsClient;
+}
+
+function App() {
+
+  const queryClient = getQueryClient();
+  const wsClient = getWSClient();
   const [trpcClient] = useState(() =>
     createTRPCClient<AppRouter>({
       links: [
@@ -63,7 +70,7 @@ function App() {
           condition(op) {
             return op.type === 'subscription';
           },
-          true: wsLink({ client: wsClient }),
+          true: wsLink({client: wsClient}),
           false: httpLink({
             url: 'http://localhost:3000/api',
             fetch(url, options) {

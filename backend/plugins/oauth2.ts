@@ -52,7 +52,11 @@ const oauthPlugin: FastifyPluginAsync = async (fastify: FastifyInstance) => {
   fastify.get('/logout', {cors: false}, async (request, reply) => {
     const token = getCurrentToken(request);
     if (!token) return reply.redirect(request.headers.referer || '/');
-    await fastify.googleOAuth2.revokeToken(token, 'access_token', undefined);
+    try {
+      await fastify.googleOAuth2.revokeToken(token, 'access_token', undefined);
+    } catch (e) {
+      console.error(e);
+    }
     request.session.delete();
     // TODO: stop hard-coding
     reply.redirect('http://localhost:5173/')

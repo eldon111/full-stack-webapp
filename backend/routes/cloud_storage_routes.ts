@@ -7,7 +7,7 @@ import multipart from "@fastify/multipart";
 import {promisify} from "util";
 import {pipeline} from "stream";
 import {authenticationGuard} from "../utils/authenticationGuardMiddleware";
-import {generateImageURLs} from "../plugins/imageStorage";
+import {generateImageURLs} from "../utils/imageStorage";
 
 // Promisify the pipeline method for handling file streams.
 const pump = promisify(pipeline);

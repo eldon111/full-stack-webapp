@@ -6,7 +6,7 @@ import {useQuery} from "@tanstack/react-query";
 function Home() {
 
   const trpc = useTRPC();
-  const imageUrlListQuery = useQuery(trpc.image.list.queryOptions());
+  const imageUrlListQuery = useQuery(trpc.image.getThumbnailUrls.queryOptions());
 
   if (imageUrlListQuery.isLoading) {
     return <div>Loading...</div>

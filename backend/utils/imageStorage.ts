@@ -1,5 +1,7 @@
 import {Bucket, GetSignedUrlConfig, Storage} from "@google-cloud/storage";
 import {UserInfo} from "../trpc";
+import path from "node:path";
+import {negate} from "./functionUtils";
 
 const IMAGE_BUCKET_NAME = 'eldons-full-stack-webapp-images';
 
@@ -43,10 +45,25 @@ async function generateImageUrl(fileName: string, action: 'read' | 'write' | 'de
   return url;
 }
 
+function isThumbnail(filename: string) {
+  return path.dirname(filename).endsWith('/thumbnails');
+}
+
 export async function generateImageURLs(userInfo: UserInfo): Promise<string[]> {
   const filenames = await listFilenames(getNamespace(userInfo))
   return Promise.all(
-    filenames.map(async filename => await generateImageUrl(filename, 'read'))
+    filenames
+      .filter(negate(isThumbnail))
+      .map(async filename => await generateImageUrl(filename, 'read'))
+  );
+}
+
+export async function generateThumbnailURLs(userInfo: UserInfo): Promise<string[]> {
+  const filenames = await listFilenames(getNamespace(userInfo))
+  return Promise.all(
+    filenames
+      .filter(isThumbnail)
+      .map(async filename => await generateImageUrl(filename, 'read'))
   );
 }
 

@@ -1,4 +1,4 @@
-import {StrictMode, useState} from 'react'
+import {StrictMode, useEffect, useState} from 'react'
 import '../index.css'
 import {
   Dropzone,
@@ -9,13 +9,13 @@ import {
   DropzoneUploadIcon,
   DropzoneZone
 } from "@/components/ui/dropzone.tsx";
-import {DropEvent} from "react-dropzone";
 import {useQuery} from "@tanstack/react-query";
 import {useTRPC, useTRPCClient} from "@/utils/trpc.ts";
 import axios from 'axios';
 import {Progress} from "@/components/ui/progress.tsx";
 
 type UploadProgress = Record<string, { progress: number }>
+type ThumbnailComplete = Record<string, { complete: boolean }>
 
 function Upload() {
 
@@ -23,15 +23,36 @@ function Upload() {
   const trpcClient = useTRPCClient();
   const loggedInQuery = useQuery(trpc.users.loggedIn.queryOptions());
 
-  // const [uploads, setUploads] = useState<Map<string, number>>(new Map());
   const [uploads, setUploads] = useState<UploadProgress>({});
+  const [thumbnailsComplete, setThumbnailsComplete] = useState<ThumbnailComplete>({});
 
-  const updateData = (filename: string, value: number) => {
-    setUploads(prevData =>  ({
+  const updateUploadProgress = (filename: string, value: number) => {
+    setUploads(prevData => ({
       ...prevData,
-      [filename]: { progress: value }
+      [filename]: {progress: value}
     }));
   };
+  const updateThumbnailComplete = (filename: string, value: boolean) => {
+    setThumbnailsComplete(prevData => ({
+      ...prevData,
+      [filename]: {complete: value}
+    }));
+  };
+
+  useEffect(() => {
+    const subscription = trpcClient.waitForThumbnail.subscribe(undefined, {
+      onData: (filename: string) => {
+        console.log("got data from thumbnail subscription:", filename);
+        updateThumbnailComplete(filename, true);
+      },
+    });
+
+    // Clean up on component unmount
+    return () => {
+      console.log("unsubscribing from thumbnail subscription");
+      subscription.unsubscribe?.();
+    };
+  }, []);
 
   if (loggedInQuery.isLoading) {
     return <div>Loading...</div>
@@ -41,8 +62,8 @@ function Upload() {
     return <div>Login to upload images</div>
   }
 
-  const handleFilesUploaded = async function <T extends File>(files: T[], event: DropEvent) {
-    console.log('event:', event);
+  const handleFilesUploaded = async function <T extends File>(files: T[]) {
+    setThumbnailsComplete({});
 
     const progresses: UploadProgress = Object.fromEntries(files.map(file => [file.name, {progress: 0}]));
     setUploads(progresses);
@@ -50,20 +71,22 @@ function Upload() {
     const promises: Promise<void>[] = files.map(
       async file => {
         const uploadUrl = await trpcClient.image.uploadUrl.query({filename: file.name});
-        axios.put(uploadUrl, await file.arrayBuffer(), {
-          headers: {
-            'Content-Type': file.type,
-          },
-          onUploadProgress: (progressEvent) => {
-            updateData(file.name, (progressEvent.progress ?? 0) * 100);
-          },
-        })
+        await axios
+          .put(uploadUrl, await file.arrayBuffer(), {
+            headers: {
+              'Content-Type': file.type,
+            },
+            onUploadProgress: (progressEvent) => {
+              updateUploadProgress(file.name, Math.round((progressEvent.progress ?? 0) * 100));
+            },
+          })
           .then(response => {
             console.log('File upload response:', response);
           })
           .catch(error => {
             console.error(`Error uploading file ${file.name}: ${error.message}`);
-          })
+          });
+        updateThumbnailComplete(file.name, false);
       }
     )
 
@@ -72,7 +95,7 @@ function Upload() {
 
   return (
     <StrictMode>
-      <div className={'flex flex-col items-center gap-4 w-1/3'}>
+      <div className={'flex flex-col items-center gap-4'}>
         <div className={'flex flex-row'}>
           <Dropzone
             accept={{
@@ -99,7 +122,16 @@ function Upload() {
           <div key={filename} className={'flex flex-row w-full'}>
             <div className={'flex flex-col w-full items-start'}>
               <span>{filename}</span>
-              <Progress value={progress}/>
+              <div className={'flex flex-row w-full items-baseline place-content-between text-left'}>
+                <Progress value={progress}/>
+              </div>
+              <div className={'flex flex-row w-full items-center'}>
+              {thumbnailsComplete[filename]
+                ? thumbnailsComplete[filename]?.complete
+                  ? <span>Thumbnail ready&nbsp;&#x2705;</span>
+                  : <span>Thumbnail processing <i className="c-inline-spinner"/></span>
+                : <span>&nbsp;</span>}
+              </div>
             </div>
           </div>
         )}
