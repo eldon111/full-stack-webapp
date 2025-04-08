@@ -10,7 +10,8 @@
     "build": "tsc -p tsconfig.json",
     "test": "node --test test/**/*.test.js",
     "start": "node dist/server.js",
-    "dev": "tsc-watch --noClear --onSuccess \"fastify start -w -l info -P dist/app.js\""
+    "dev": "tsc-watch --noClear --onSuccess \"fastify start -w -l info -P dist/app.js\"",
+    "generate-openapi": "ts-node utils/outputOpenApiSpec.ts > openapi-spec.json"
   },
   "keywords": [],
   "author": "",
@@ -37,6 +38,8 @@
     "@types/node": "^22.13.17",
     "@types/simple-get": "^4.0.3",
     "fastify": "^5.2.2",
+    "trpc-to-openapi": "^2.1.5",
+    "ts-node": "^10.9.2",
     "tsc-watch": "^6.2.1",
     "typescript": "^5.8.2"
   }

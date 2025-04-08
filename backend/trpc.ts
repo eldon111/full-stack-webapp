@@ -4,12 +4,16 @@ import {Token} from "@fastify/oauth2";
 import {CreateFastifyContextOptions} from "@trpc/server/adapters/fastify";
 import '@fastify/secure-session';
 import {Session} from "@fastify/secure-session";
+import {OpenApiMeta} from "trpc-to-openapi";
 
 /**
  * Initialization of tRPC backend
  * Should be done only once per backend!
  */
-const t = initTRPC.context<typeof createContext>().create();
+const t = initTRPC
+  .context<typeof createContext>()
+  .meta<OpenApiMeta>()
+  .create();
 
 // Middleware to check if user is authenticated
 const isAuthenticated = t.middleware(opts => {
