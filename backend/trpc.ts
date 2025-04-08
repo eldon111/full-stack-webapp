@@ -2,6 +2,8 @@ import {initTRPC, TRPCError} from '@trpc/server';
 import {FastifyRequest} from "fastify";
 import {Token} from "@fastify/oauth2";
 import {CreateFastifyContextOptions} from "@trpc/server/adapters/fastify";
+import '@fastify/secure-session';
+import {Session} from "@fastify/secure-session";
 
 /**
  * Initialization of tRPC backend
@@ -60,3 +62,10 @@ export type UserInfo = {
 export const router = t.router;
 export const publicProcedure = t.procedure;
 export const protectedProcedure = publicProcedure.use(isAuthenticated);
+
+// Add type declaration for FastifyRequest to include session property
+declare module 'fastify' {
+  interface FastifyRequest {
+    session: Session
+  }
+}

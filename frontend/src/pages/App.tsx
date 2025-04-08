@@ -1,4 +1,4 @@
-import './App.css'
+import '@/pages/App.css'
 import {QueryClient, QueryClientProvider} from "@tanstack/react-query";
 import {BrowserRouter, Route, Routes} from "react-router";
 import NavMenu from "@/pages/shared/NavMenu.tsx";
