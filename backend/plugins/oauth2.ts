@@ -44,6 +44,10 @@ async function oauthPlugin(fastify: FastifyInstance) {
       request.session.set('accessToken', result.token);
 
       this.googleOAuth2.userinfo(result.token, (err: any, userinfo: Object) => {
+        if (err) {
+          reply.send(err)
+          return
+        }
         console.log('userInfo: ', userinfo)
         request.session.set('userInfo', userinfo)
         // TODO: stop hard-coding

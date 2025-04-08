@@ -26,8 +26,11 @@
     "paths": {
       "@/*": [
         "./src/*"
+      ],
+      "backend/*": [
+        "../backend/*"
       ]
     }
   },
-  "include": ["src"]
+  "include": ["src", "../backend"]
 }

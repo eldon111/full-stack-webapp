@@ -1,39 +1,77 @@
 import './App.css'
-import {Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious} from "@/components/ui/carousel.tsx";
-import {useTRPC} from "@/utils/trpc.ts";
+import {useState} from 'react';
+import {Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious} from "@/components/ui/carousel";
+import {useTRPC} from "@/utils/trpc";
 import {useQuery} from "@tanstack/react-query";
+import {ImageDialog} from "@/components/ui/image-dialog";
+import {TRPCClientError} from "@trpc/client";
+import {AnyClientTypes} from "@trpc/server/unstable-core-do-not-import";
 
 function Home() {
+  const [selectedImageUrl, setSelectedImageUrl] = useState<string | null>(null);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   const trpc = useTRPC();
-  const imageUrlListQuery = useQuery(trpc.image.getThumbnailUrls.queryOptions());
 
-  if (imageUrlListQuery.isLoading) {
+  const thumbnailUrlsQuery = useQuery(trpc.image.getThumbnailUrls.queryOptions());
+  const fullImageUrlsQuery = useQuery(trpc.image.getImageUrls.queryOptions());
+
+  const isLoading = thumbnailUrlsQuery.isLoading || fullImageUrlsQuery.isLoading;
+  if (isLoading) {
     return <div>Loading...</div>
   }
 
-  if (imageUrlListQuery.isError && imageUrlListQuery.error.data?.code === 'UNAUTHORIZED') {
-    return <div>Login to view images</div>
+  if (thumbnailUrlsQuery.isError) {
+    // Check if it's a TRPCClientError with an UNAUTHORIZED code
+    const error = thumbnailUrlsQuery.error as TRPCClientError<AnyClientTypes>;
+    if (error.data?.code === 'UNAUTHORIZED') {
+      return <div>Login to view images</div>
+    }
+    return <div>Error loading images</div>
   }
 
-  if (imageUrlListQuery.data?.length === 0) {
+  const thumbnailUrls = thumbnailUrlsQuery.data as string[] || [];
+  if (thumbnailUrls.length === 0) {
     return <div>No images</div>
   }
+
+  const handleThumbnailClick = (index: number) => {
+    if (fullImageUrlsQuery.data && fullImageUrlsQuery.data[index]) {
+      setSelectedImageUrl(fullImageUrlsQuery.data[index]);
+      setIsDialogOpen(true);
+    }
+  };
+
+  const handleCloseDialog = () => {
+    setIsDialogOpen(false);
+    setSelectedImageUrl(null);
+  };
 
   return (
     <div className="flex flex-col min-h-svh">
       <Carousel opts={{loop: true}}>
         <CarouselContent>
           {
-            imageUrlListQuery.data?.map(url =>
+            thumbnailUrls.map((url, index) =>
               <CarouselItem key={url} className={'basis-1/3'}>
-                <img src={url} alt={url}/>
+                <div
+                  className="cursor-pointer hover:opacity-90 transition-opacity"
+                  onClick={() => handleThumbnailClick(index)}
+                >
+                  <img src={url} alt={`Thumbnail ${index + 1}`} className="rounded-md"/>
+                </div>
               </CarouselItem>)
           }
         </CarouselContent>
         <CarouselPrevious/>
         <CarouselNext/>
       </Carousel>
+
+      <ImageDialog
+        isOpen={isDialogOpen}
+        onClose={handleCloseDialog}
+        imageUrl={selectedImageUrl}
+      />
     </div>
   )
 }
