@@ -1,8 +1,8 @@
-import {CloudEventV1} from "cloudevents/dist/event/interfaces";
-import {Storage} from "@google-cloud/storage";
-import sharp from "sharp";
-import path from 'path'
-import {PubSub} from "@google-cloud/pubsub";
+import { CloudEventV1 } from 'cloudevents/dist/event/interfaces';
+import { Storage } from '@google-cloud/storage';
+import sharp from 'sharp';
+import path from 'path';
+import { PubSub } from '@google-cloud/pubsub';
 
 // can't use import with this, or it doesn't work
 const functions = require('@google-cloud/functions-framework');
@@ -11,7 +11,7 @@ const TARGET_WIDTH = 320;
 const TARGET_HEIGHT = 240;
 
 const storage = new Storage();
-const pubsub = new PubSub({projectId: 'avian-presence-455118-j3'});
+const pubsub = new PubSub({ projectId: 'avian-presence-455118-j3' });
 const topic = pubsub.topic('thumbnail-created');
 console.log(`Topic ${topic.name} accessed.`);
 
@@ -33,31 +33,25 @@ async function process(bucket: string, filename: string) {
     return;
   }
 
-  const newDir = dirname.replace('/uploads','/thumbnails');
+  const newDir = dirname.replace('/uploads', '/thumbnails');
   const oldExt = path.extname(filename);
   const basename = path.basename(filename, oldExt);
-  const newFilename = `${newDir}/${basename}.webp`
+  const newFilename = `${newDir}/${basename}.webp`;
 
-  const [buffer] = await storage
-    .bucket(bucket)
-    .file(filename)
-    .download()
+  const [buffer] = await storage.bucket(bucket).file(filename).download();
 
-  await resizeImage(buffer)
-    .then(function (data) {
-      storage.bucket(bucket).file(newFilename).save(data)
-    });
+  await resizeImage(buffer).then(function (data) {
+    storage.bucket(bucket).file(newFilename).save(data);
+  });
 
   try {
-    const messageId = await topic.publishMessage({data: Buffer.from(filename)});
+    const messageId = await topic.publishMessage({ data: Buffer.from(filename) });
     console.log(`Message ${messageId} published.`);
   } catch (error) {
-    console.error(
-      `Received error while publishing: ${(error as Error).message}`
-    );
+    console.error(`Received error while publishing: ${(error as Error).message}`);
   }
 
-  console.log("Done");
+  console.log('Done');
 }
 
 export async function resizeImage(buffer: Buffer | string): Promise<Buffer<ArrayBufferLike>> {
