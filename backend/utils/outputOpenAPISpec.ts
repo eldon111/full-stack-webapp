@@ -1,4 +1,4 @@
-import {openApiDocument} from "./generateOpenAPISpec";
+import { openApiDocument } from './generateOpenAPISpec';
 
 console.log(JSON.stringify(openApiDocument, null, 2));
 

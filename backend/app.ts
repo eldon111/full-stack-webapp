@@ -1,29 +1,28 @@
-'use strict'
+'use strict';
 
-import path from "node:path"
-import AutoLoad from "@fastify/autoload"
-import {FastifyInstance, FastifyPluginAsync} from "fastify"
-import cors from "@fastify/cors";
-import closeWithGrace from "close-with-grace";
+import path from 'node:path';
+import AutoLoad from '@fastify/autoload';
+import { FastifyInstance, FastifyPluginAsync } from 'fastify';
+import cors from '@fastify/cors';
+import closeWithGrace from 'close-with-grace';
 
-import secureSession from "@fastify/secure-session";
-import fastifyCookie from "@fastify/cookie";
-import {Token} from "@fastify/oauth2";
-import {accessSecretAsBuffer} from "./utils/secretManagement";
-import {fastifyTRPCPlugin, FastifyTRPCPluginOptions} from "@trpc/server/adapters/fastify";
-import {AppRouter, appRouter} from "./routes/router";
-import {createContext} from "./trpc";
+import secureSession from '@fastify/secure-session';
+import fastifyCookie from '@fastify/cookie';
+import { Token } from '@fastify/oauth2';
+import { accessSecretAsBuffer } from './utils/secretManagement';
+import { fastifyTRPCPlugin, FastifyTRPCPluginOptions } from '@trpc/server/adapters/fastify';
+import { AppRouter, appRouter } from './routes/router';
+import { createContext } from './trpc';
 import ws from '@fastify/websocket';
 
 const appService: FastifyPluginAsync = async (server: FastifyInstance) => {
-
   // delay is the number of milliseconds for the graceful close to finish
-  closeWithGrace({delay: Number(process.env.FASTIFY_CLOSE_GRACE_DELAY) || 500}, async function ({err}) {
+  closeWithGrace({ delay: Number(process.env.FASTIFY_CLOSE_GRACE_DELAY) || 500 }, async function ({ err }) {
     if (err) {
-      server.log.error(err)
+      server.log.error(err);
     }
-    await server.close()
-  })
+    await server.close();
+  });
 
   server.register(fastifyCookie); // Required for sessions
 
@@ -31,8 +30,8 @@ const appService: FastifyPluginAsync = async (server: FastifyInstance) => {
     key: await accessSecretAsBuffer('secure-session-key'),
     expiry: 24 * 60 * 60, // Default 1 day
     cookie: {
-      path: '/'
-    }
+      path: '/',
+    },
   });
 
   server.register(ws);
@@ -43,7 +42,7 @@ const appService: FastifyPluginAsync = async (server: FastifyInstance) => {
     trpcOptions: {
       router: appRouter,
       createContext,
-      onError({path, error}) {
+      onError({ path, error }) {
         // report to error monitoring
         console.error(`Error in tRPC handler on path '${path}':`, error);
       },
@@ -53,23 +52,23 @@ const appService: FastifyPluginAsync = async (server: FastifyInstance) => {
   server.register(cors, {
     credentials: true,
     origin: (origin, cb) => {
-      server.log.info('CORS origin: ', origin)
+      server.log.info('CORS origin: ', origin);
       if (!origin) {
         // TODO: better handling of missing origin
         // return cb(new Error("Not allowed"), false)
-        return cb(null, true)
+        return cb(null, true);
       }
-      const hostname = new URL(origin).hostname
-      if (hostname === "localhost") {
-        server.log.info('localhost, no CORS protection')
+      const hostname = new URL(origin).hostname;
+      if (hostname === 'localhost') {
+        server.log.info('localhost, no CORS protection');
         //  Request from localhost will pass
-        cb(null, true)
+        cb(null, true);
       } else {
         //   Generate an error on other origins, disabling access
-        cb(new Error("Not allowed"), false)
+        cb(new Error('Not allowed'), false);
       }
     },
-  })
+  });
 
   // Do not touch the following lines
 
@@ -78,16 +77,16 @@ const appService: FastifyPluginAsync = async (server: FastifyInstance) => {
   // through your application
   server.register(AutoLoad, {
     dir: path.join(__dirname, 'plugins'),
-    options: Object.assign({})
-  })
+    options: Object.assign({}),
+  });
 
   // This loads all plugins defined in routes
   // define your routes in one of these
   server.register(AutoLoad, {
     dir: path.join(__dirname, 'routes'),
-    options: Object.assign({})
-  })
-}
+    options: Object.assign({}),
+  });
+};
 
 declare module '@fastify/secure-session' {
   interface SessionData {
@@ -96,4 +95,4 @@ declare module '@fastify/secure-session' {
   }
 }
 
-export default appService
+export default appService;
