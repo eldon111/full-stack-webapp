@@ -50,8 +50,7 @@ async function oauthPlugin(fastify: FastifyInstance) {
         }
         console.log('userInfo: ', userinfo);
         request.session.set('userInfo', userinfo);
-        // TODO: stop hard-coding
-        reply.redirect('http://localhost:5173/');
+        reply.redirect(process.env.FRONTEND_URL || '/');
       });
     });
   });
@@ -65,8 +64,7 @@ async function oauthPlugin(fastify: FastifyInstance) {
       console.error(e);
     }
     request.session.delete();
-    // TODO: stop hard-coding
-    reply.redirect('http://localhost:5173/');
+    reply.redirect(process.env.FRONTEND_URL || '/');
   });
 }
 

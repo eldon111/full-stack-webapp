@@ -42,7 +42,9 @@ function getQueryClient() {
     // This is very important, so we don't re-make a new client if React
     // suspends during the initial render. This may not be needed if we
     // have a suspense boundary BELOW the creation of the query client
-    if (!browserQueryClient) browserQueryClient = makeQueryClient();
+    if (!browserQueryClient) {
+      browserQueryClient = makeQueryClient();
+    }
     return browserQueryClient;
   }
 }
@@ -52,7 +54,7 @@ let wsClient: ReturnType<typeof createWSClient> | undefined = undefined;
 function getWSClient() {
   if (!wsClient) {
     wsClient = createWSClient({
-      url: 'ws://localhost:3000/api',
+      url: `${import.meta.env.VITE_REACT_APP_API_BASE_URL}/api`,
       onError(err) {
         console.error(err);
       },
@@ -73,7 +75,7 @@ function App() {
           },
           true: wsLink({ client: wsClient }),
           false: httpLink({
-            url: 'http://localhost:3000/api',
+            url: `${import.meta.env.VITE_REACT_APP_API_BASE_URL}/api`,
             fetch(url, options) {
               return fetch(url, {
                 ...options,
