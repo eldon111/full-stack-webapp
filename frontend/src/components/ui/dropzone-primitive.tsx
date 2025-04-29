@@ -1,46 +1,42 @@
-"use client"
+'use client';
 
-import * as React from "react"
-import {composeEventHandlers} from "@radix-ui/primitive"
-import {Primitive} from "@radix-ui/react-primitive"
-import {type DropzoneOptions, type DropzoneState, FileRejection, FileWithPath, useDropzone,} from "react-dropzone"
+import * as React from 'react';
+import { composeEventHandlers } from '@radix-ui/primitive';
+import { Primitive } from '@radix-ui/react-primitive';
+import { type DropzoneOptions, type DropzoneState, FileRejection, FileWithPath, useDropzone } from 'react-dropzone';
 
-export type DropzoneContextProps = DropzoneState & DropzoneOptions
+export type DropzoneContextProps = DropzoneState & DropzoneOptions;
 
-const DropzoneContext = React.createContext<DropzoneContextProps>(
-  {} as DropzoneContextProps
-)
+const DropzoneContext = React.createContext<DropzoneContextProps>({} as DropzoneContextProps);
 
-export const useDropzoneContext = () => React.useContext(DropzoneContext)
+export const useDropzoneContext = () => React.useContext(DropzoneContext);
 
 export interface DropzoneProps extends DropzoneOptions {
-  children: React.ReactNode | ((state: DropzoneContextProps) => React.ReactNode)
+  children: React.ReactNode | ((state: DropzoneContextProps) => React.ReactNode);
 }
 
 export const Dropzone = ({ children, ...props }: DropzoneProps) => {
-  const state = useDropzone(props)
+  const state = useDropzone(props);
 
-  const context = { ...state, ...props }
+  const context = { ...state, ...props };
 
   return (
     <DropzoneContext.Provider value={context}>
-      {typeof children === "function" ? children(context) : children}
+      {typeof children === 'function' ? children(context) : children}
     </DropzoneContext.Provider>
-  )
-}
-Dropzone.displayName = "Dropzone"
+  );
+};
+Dropzone.displayName = 'Dropzone';
 
 export const DropzoneInput = React.forwardRef<
   React.ElementRef<typeof Primitive.input>,
   React.ComponentPropsWithoutRef<typeof Primitive.input>
 >((props, ref) => {
-  const { getInputProps, disabled } = useDropzoneContext()
+  const { getInputProps, disabled } = useDropzoneContext();
 
-  return (
-    <Primitive.input ref={ref} {...getInputProps({ disabled, ...props })} />
-  )
-})
-DropzoneInput.displayName = "DropzoneInput"
+  return <Primitive.input ref={ref} {...getInputProps({ disabled, ...props })} />;
+});
+DropzoneInput.displayName = 'DropzoneInput';
 
 export const DropzoneZone = React.forwardRef<
   React.ElementRef<typeof Primitive.div>,
@@ -59,7 +55,7 @@ export const DropzoneZone = React.forwardRef<
     noDrag,
     noDragEventsBubbling,
     disabled,
-  } = useDropzoneContext()
+  } = useDropzoneContext();
 
   return (
     <Primitive.div
@@ -77,110 +73,90 @@ export const DropzoneZone = React.forwardRef<
       data-file-dialog-active={isFileDialogActive ? true : undefined}
       {...getRootProps(props)}
     />
-  )
-})
-DropzoneZone.displayName = "DropzoneZone"
+  );
+});
+DropzoneZone.displayName = 'DropzoneZone';
 
 export const DropzoneTrigger = React.forwardRef<
   React.ElementRef<typeof Primitive.button>,
   React.ComponentPropsWithoutRef<typeof Primitive.button>
 >(({ onClick, ...props }, ref) => {
-  const { open } = useDropzoneContext()
+  const { open } = useDropzoneContext();
 
-  return (
-    <Primitive.button
-      ref={ref}
-      onClick={composeEventHandlers(onClick, open)}
-      {...props}
-    />
-  )
-})
-DropzoneTrigger.displayName = "DropzoneTrigger"
+  return <Primitive.button ref={ref} onClick={composeEventHandlers(onClick, open)} {...props} />;
+});
+DropzoneTrigger.displayName = 'DropzoneTrigger';
 
 export interface DropzoneDragAcceptedProps {
-  children?: React.ReactNode
+  children?: React.ReactNode;
 }
 
-export const DropzoneDragAccepted = ({
-                                       children,
-                                     }: DropzoneDragAcceptedProps) => {
-  const { isDragAccept } = useDropzoneContext()
+export const DropzoneDragAccepted = ({ children }: DropzoneDragAcceptedProps) => {
+  const { isDragAccept } = useDropzoneContext();
 
   if (!isDragAccept) {
-    return null
+    return null;
   }
 
-  return children
-}
+  return children;
+};
 
 export interface DropzoneDragRejectedProps {
-  children?: React.ReactNode
+  children?: React.ReactNode;
 }
 
-export const DropzoneDragRejected = ({
-                                       children,
-                                     }: DropzoneDragRejectedProps) => {
-  const { isDragReject } = useDropzoneContext()
+export const DropzoneDragRejected = ({ children }: DropzoneDragRejectedProps) => {
+  const { isDragReject } = useDropzoneContext();
 
   if (!isDragReject) {
-    return null
+    return null;
   }
 
-  return children
-}
+  return children;
+};
 
 export interface DropzoneDragDefaultProps {
-  children?: React.ReactNode
+  children?: React.ReactNode;
 }
 
 export const DropzoneDragDefault = ({ children }: DropzoneDragDefaultProps) => {
-  const { isDragActive } = useDropzoneContext()
+  const { isDragActive } = useDropzoneContext();
 
   if (isDragActive) {
-    return null
+    return null;
   }
 
-  return children
-}
+  return children;
+};
 
 export interface DropzoneAcceptedProps {
-  children: (acceptedFiles: Readonly<FileWithPath[]>) => React.ReactNode
+  children: (acceptedFiles: Readonly<FileWithPath[]>) => React.ReactNode;
 }
 
 export const DropzoneAccepted = ({ children }: DropzoneAcceptedProps) => {
-  const { acceptedFiles } = useDropzoneContext()
+  const { acceptedFiles } = useDropzoneContext();
 
-  return children(acceptedFiles)
-}
+  return children(acceptedFiles);
+};
 
 export interface DropzoneRejectedProps {
-  children: (fileRejections: Readonly<FileRejection[]>) => React.ReactNode
+  children: (fileRejections: Readonly<FileRejection[]>) => React.ReactNode;
 }
 
 export const DropzoneRejected = ({ children }: DropzoneRejectedProps) => {
-  const { fileRejections } = useDropzoneContext()
+  const { fileRejections } = useDropzoneContext();
 
-  return children(fileRejections)
-}
+  return children(fileRejections);
+};
 
-const Root = Dropzone
-const Input = DropzoneInput
-const Zone = DropzoneZone
-const Trigger = DropzoneTrigger
-const DragAccepted = DropzoneDragAccepted
-const DragRejected = DropzoneDragRejected
-const DragDefault = DropzoneDragDefault
-const Accepted = DropzoneAccepted
-const Rejected = DropzoneRejected
+const Root = Dropzone;
+const Input = DropzoneInput;
+const Zone = DropzoneZone;
+const Trigger = DropzoneTrigger;
+const DragAccepted = DropzoneDragAccepted;
+const DragRejected = DropzoneDragRejected;
+const DragDefault = DropzoneDragDefault;
+const Accepted = DropzoneAccepted;
+const Rejected = DropzoneRejected;
 
-export {
-  Root,
-  Input,
-  Zone,
-  Trigger,
-  DragAccepted,
-  DragRejected,
-  DragDefault,
-  Accepted,
-  Rejected,
-}
+export { Root, Input, Zone, Trigger, DragAccepted, DragRejected, DragDefault, Accepted, Rejected };

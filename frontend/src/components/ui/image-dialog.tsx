@@ -1,6 +1,6 @@
-import {Dialog, DialogContent} from '@/components/ui/dialog';
-import {X} from 'lucide-react';
-import {Button} from '@/components/ui/button';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
+import { X } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 interface ImageDialogProps {
   isOpen: boolean;
@@ -24,11 +24,7 @@ export function ImageDialog({ isOpen, onClose, imageUrl }: ImageDialogProps) {
           <span className="sr-only">Close</span>
         </Button>
         <div className="relative w-full h-full flex items-center justify-center">
-          <img
-            src={imageUrl}
-            alt="Full size image"
-            className="max-h-[80vh] max-w-full object-contain"
-          />
+          <img src={imageUrl} alt="Full size image" className="max-h-[80vh] max-w-full object-contain" />
         </div>
       </DialogContent>
     </Dialog>

@@ -1,10 +1,10 @@
-import '../App.css'
+import '../App.css';
 import {
   NavigationMenu,
   NavigationMenuItem,
   NavigationMenuLink,
-  NavigationMenuList
-} from "@/components/ui/navigation-menu.tsx";
+  NavigationMenuList,
+} from '@/components/ui/navigation-menu.tsx';
 
 function NavMenu() {
   return (
@@ -32,7 +32,7 @@ function NavMenu() {
         </NavigationMenuItem>
       </NavigationMenuList>
     </NavigationMenu>
-  )
+  );
 }
 
-export default NavMenu
+export default NavMenu;

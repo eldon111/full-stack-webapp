@@ -1,14 +1,14 @@
-import '@/pages/App.css'
-import {QueryClient, QueryClientProvider} from "@tanstack/react-query";
-import {BrowserRouter, Route, Routes} from "react-router";
-import NavMenu from "@/pages/shared/NavMenu.tsx";
-import Upload from "@/pages/Upload.tsx";
-import Login from "@/pages/Login.tsx";
-import Home from "@/pages/Home.tsx";
-import {TRPCProvider} from "@/utils/trpc.ts";
-import {useState} from "react";
-import {createTRPCClient, createWSClient, httpLink, splitLink, TRPCClientErrorLike, wsLink} from "@trpc/client";
-import type {AppRouter} from 'backend/routes/router';
+import '@/pages/App.css';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { BrowserRouter, Route, Routes } from 'react-router';
+import NavMenu from '@/pages/shared/NavMenu.tsx';
+import Upload from '@/pages/Upload.tsx';
+import Login from '@/pages/Login.tsx';
+import Home from '@/pages/Home.tsx';
+import { TRPCProvider } from '@/utils/trpc.ts';
+import { useState } from 'react';
+import { createTRPCClient, createWSClient, httpLink, splitLink, TRPCClientErrorLike, wsLink } from '@trpc/client';
+import type { AppRouter } from 'backend/routes/router';
 
 function makeQueryClient() {
   return new QueryClient({
@@ -50,17 +50,18 @@ function getQueryClient() {
 let wsClient: ReturnType<typeof createWSClient> | undefined = undefined;
 
 function getWSClient() {
-  if (!wsClient) wsClient = createWSClient({
-    url: 'ws://localhost:3000/api',
-    onError(err) {
-      console.error(err);
-    }
-  });
+  if (!wsClient) {
+    wsClient = createWSClient({
+      url: 'ws://localhost:3000/api',
+      onError(err) {
+        console.error(err);
+      },
+    });
+  }
   return wsClient;
 }
 
 function App() {
-
   const queryClient = getQueryClient();
   const wsClient = getWSClient();
   const [trpcClient] = useState(() =>
@@ -70,7 +71,7 @@ function App() {
           condition(op) {
             return op.type === 'subscription';
           },
-          true: wsLink({client: wsClient}),
+          true: wsLink({ client: wsClient }),
           false: httpLink({
             url: 'http://localhost:3000/api',
             fetch(url, options) {
@@ -89,16 +90,16 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <TRPCProvider trpcClient={trpcClient} queryClient={queryClient}>
         <BrowserRouter>
-          <NavMenu/>
+          <NavMenu />
           <Routes>
-            <Route path="/" element={<Home/>}/>
-            <Route path="/upload" element={<Upload/>}/>
-            <Route path="/login" element={<Login/>}/>
+            <Route path="/" element={<Home />} />
+            <Route path="/upload" element={<Upload />} />
+            <Route path="/login" element={<Login />} />
           </Routes>
         </BrowserRouter>
       </TRPCProvider>
     </QueryClientProvider>
-  )
+  );
 }
 
-export default App
+export default App;

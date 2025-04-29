@@ -1,15 +1,15 @@
-"use client"
+'use client';
 
-import * as React from "react"
-import {Primitive} from "@radix-ui/react-primitive"
-import {Ban, CheckCircle2, Upload} from "lucide-react"
+import * as React from 'react';
+import { Primitive } from '@radix-ui/react-primitive';
+import { Ban, CheckCircle2, Upload } from 'lucide-react';
 
-import {cn} from "@/lib/utils"
-import * as DropzonePrimitive from "@/components/ui/dropzone-primitive"
+import { cn } from '@/lib/utils';
+import * as DropzonePrimitive from '@/components/ui/dropzone-primitive';
 
-export const Dropzone = DropzonePrimitive.Dropzone
+export const Dropzone = DropzonePrimitive.Dropzone;
 
-export const DropzoneInput = DropzonePrimitive.Input
+export const DropzoneInput = DropzonePrimitive.Input;
 
 export const DropzoneZone = React.forwardRef<
   React.ComponentRef<typeof DropzonePrimitive.Zone>,
@@ -18,13 +18,13 @@ export const DropzoneZone = React.forwardRef<
   <DropzonePrimitive.Zone
     ref={ref}
     className={cn(
-      "cursor-pointer rounded-md border-2 border-dashed border-input p-6 shadow-sm transition-colors hover:border-accent-foreground/50 hover:bg-accent focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring data-[disabled]:cursor-not-allowed data-[drag-reject]:cursor-no-drop data-[no-click]:cursor-default data-[disabled]:border-inherit data-[drag-active]:border-accent-foreground/50 data-[drag-reject]:border-destructive data-[disabled]:bg-inherit data-[drag-active]:bg-accent data-[drag-reject]:bg-destructive/30 data-[disabled]:opacity-50",
-      className
+      'cursor-pointer rounded-md border-2 border-dashed border-input p-6 shadow-sm transition-colors hover:border-accent-foreground/50 hover:bg-accent focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring data-[disabled]:cursor-not-allowed data-[drag-reject]:cursor-no-drop data-[no-click]:cursor-default data-[disabled]:border-inherit data-[drag-active]:border-accent-foreground/50 data-[drag-reject]:border-destructive data-[disabled]:bg-inherit data-[drag-active]:bg-accent data-[drag-reject]:bg-destructive/30 data-[disabled]:opacity-50',
+      className,
     )}
     {...props}
   />
-))
-DropzoneZone.displayName = "DropzoneZone"
+));
+DropzoneZone.displayName = 'DropzoneZone';
 
 export const DropzoneUploadIcon = React.forwardRef<
   React.ComponentRef<typeof Upload>,
@@ -32,56 +32,44 @@ export const DropzoneUploadIcon = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <>
     <DropzonePrimitive.DragAccepted>
-      <CheckCircle2 ref={ref} className={cn("size-8", className)} {...props} />
+      <CheckCircle2 ref={ref} className={cn('size-8', className)} {...props} />
     </DropzonePrimitive.DragAccepted>
     <DropzonePrimitive.DragRejected>
-      <Ban ref={ref} className={cn("size-8", className)} {...props} />
+      <Ban ref={ref} className={cn('size-8', className)} {...props} />
     </DropzonePrimitive.DragRejected>
     <DropzonePrimitive.DragDefault>
-      <Upload ref={ref} className={cn("size-8", className)} {...props} />
+      <Upload ref={ref} className={cn('size-8', className)} {...props} />
     </DropzonePrimitive.DragDefault>
   </>
-))
-DropzoneUploadIcon.displayName = "DropzoneUploadIcon"
+));
+DropzoneUploadIcon.displayName = 'DropzoneUploadIcon';
 
 export const DropzoneGroup = React.forwardRef<
   React.ComponentRef<typeof Primitive.div>,
   React.ComponentPropsWithoutRef<typeof Primitive.div>
 >(({ className, ...props }, ref) => (
-  <Primitive.div
-    ref={ref}
-    className={cn("grid place-items-center gap-1.5", className)}
-    {...props}
-  />
-))
-DropzoneGroup.displayName = "DropzoneGroup"
+  <Primitive.div ref={ref} className={cn('grid place-items-center gap-1.5', className)} {...props} />
+));
+DropzoneGroup.displayName = 'DropzoneGroup';
 
 export const DropzoneTitle = React.forwardRef<
   React.ComponentRef<typeof Primitive.h3>,
   React.ComponentPropsWithoutRef<typeof Primitive.h3>
 >(({ className, ...props }, ref) => (
-  <Primitive.h3
-    ref={ref}
-    className={cn("font-medium leading-none tracking-tight", className)}
-    {...props}
-  />
-))
-DropzoneTitle.displayName = "DropzoneTitle"
+  <Primitive.h3 ref={ref} className={cn('font-medium leading-none tracking-tight', className)} {...props} />
+));
+DropzoneTitle.displayName = 'DropzoneTitle';
 
 export const DropzoneDescription = React.forwardRef<
   React.ComponentRef<typeof Primitive.p>,
   React.ComponentPropsWithoutRef<typeof Primitive.p>
 >(({ className, ...props }, ref) => (
-  <Primitive.p
-    ref={ref}
-    className={cn("text-sm text-muted-foreground", className)}
-    {...props}
-  />
-))
-DropzoneDescription.displayName = "DropzoneDescription"
+  <Primitive.p ref={ref} className={cn('text-sm text-muted-foreground', className)} {...props} />
+));
+DropzoneDescription.displayName = 'DropzoneDescription';
 
-export const DropzoneTrigger = DropzonePrimitive.Trigger
+export const DropzoneTrigger = DropzonePrimitive.Trigger;
 
-export const DropzoneAccepted = DropzonePrimitive.Accepted
+export const DropzoneAccepted = DropzonePrimitive.Accepted;
 
-export const DropzoneRejected = DropzonePrimitive.Rejected
+export const DropzoneRejected = DropzonePrimitive.Rejected;
