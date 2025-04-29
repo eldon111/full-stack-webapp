@@ -35,9 +35,11 @@ function Home() {
     return <div>No images</div>;
   }
 
+  const fullImageUrls = (fullImageUrlsQuery.data as string[]) || [];
+
   const handleThumbnailClick = (index: number) => {
-    if (fullImageUrlsQuery.data && fullImageUrlsQuery.data[index]) {
-      setSelectedImageUrl(fullImageUrlsQuery.data[index]);
+    if (fullImageUrls[index]) {
+      setSelectedImageUrl(fullImageUrls[index]);
       setIsDialogOpen(true);
     }
   };

@@ -29,5 +29,8 @@
       ]
     }
   },
-  "include": ["src", "../backend"]
+  "include": [
+    "src",
+    "../backend/routes/router.ts"
+  ]
 }
