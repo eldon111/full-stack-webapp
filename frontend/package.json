@@ -10,6 +10,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@emathias-web-app/backend-routes": "^1.0.0",
     "@radix-ui/react-dialog": "^1.1.7",
     "@radix-ui/react-navigation-menu": "^1.2.5",
     "@radix-ui/react-primitive": "^2.0.2",
