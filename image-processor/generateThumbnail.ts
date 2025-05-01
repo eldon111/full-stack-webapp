@@ -11,7 +11,7 @@ const TARGET_WIDTH = 320;
 const TARGET_HEIGHT = 240;
 
 const storage = new Storage();
-const pubsub = new PubSub({ projectId: 'avian-presence-455118-j3' });
+const pubsub = new PubSub();
 const topic = pubsub.topic('thumbnail-created');
 console.log(`Topic ${topic.name} accessed.`);
 
