@@ -12,7 +12,7 @@ terraform/
 ├── variables.tf             # Input variables
 ├── outputs.tf               # Output values
 ├── provider.tf              # Provider configuration
-├── backend.tf               # Backend configuration for state
+├── backend.tf               # Placeholder for backend configuration
 ├── modules/
 │   ├── common/              # Shared resources
 │   ├── backend/             # Backend-specific resources
@@ -118,7 +118,8 @@ terraform destroy -var="project_id=YOUR_PROJECT_ID"
 
 ## Notes
 
-- The backend configuration (`backend.tf`) is commented out by default. Uncomment and configure it after creating a GCS
-  bucket for Terraform state.
+- The backend configuration is defined in each environment directory (`environments/dev/backend.tf` and
+  `environments/prod/backend.tf`).
+- Update the backend configuration in each environment directory with your specific GCS bucket for Terraform state.
 - Update the `terraform.tfvars` files in each environment directory with your specific values.
 - For production deployments, consider using a CI/CD pipeline to automate the deployment process.
