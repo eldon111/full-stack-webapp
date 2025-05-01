@@ -30,11 +30,14 @@ steps:
     args:
       - '-c'
       - |
-        if [ -d "environments/$BRANCH_NAME/" ]; then
-          cd environments/$BRANCH_NAME
+        if [ -d "terraform/environments/$BRANCH_NAME/" ]; then
+          echo "init specifically in $BRANCH_NAME branch"
+          cd terraform/environments/$BRANCH_NAME
           terraform init
         else
-          for dir in environments/*/
+          pwd
+          ls
+          for dir in terraform/environments/*/
           do 
             cd ${dir}   
             env=${dir%*/}
@@ -44,7 +47,7 @@ steps:
             echo "******* At environment: ${env} ********"
             echo "*************************************************"
             terraform init || exit 1
-            cd ../../
+            cd ../../../
           done
         fi 
 
@@ -55,11 +58,11 @@ steps:
     args:
       - '-c'
       - |
-        if [ -d "environments/$BRANCH_NAME/" ]; then
-          cd environments/$BRANCH_NAME
+        if [ -d "terraform/environments/$BRANCH_NAME/" ]; then
+          cd terraform/environments/$BRANCH_NAME
           terraform plan
         else
-          for dir in environments/*/
+          for dir in terraform/environments/*/
           do 
             cd ${dir}   
             env=${dir%*/}
@@ -69,7 +72,7 @@ steps:
             echo "******* At environment: ${env} ********"
             echo "*************************************************"
             terraform plan || exit 1
-            cd ../../
+            cd ../../../
           done
         fi
   # [END tf-plan]
@@ -81,8 +84,8 @@ steps:
     args:
       - '-c'
       - |
-        if [ -d "environments/$BRANCH_NAME/" ]; then
-          cd environments/$BRANCH_NAME      
+        if [ -d "terraform/environments/$BRANCH_NAME/" ]; then
+          cd terraform/environments/$BRANCH_NAME      
           terraform apply -auto-approve
         else
           echo "***************************** SKIPPING APPLYING *******************************"
