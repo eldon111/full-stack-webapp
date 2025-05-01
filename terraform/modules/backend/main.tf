@@ -40,8 +40,10 @@ resource "google_cloud_run_v2_service" "backend" {
 
       # Set resource limits
       resources {
-        cpu    = var.cpu
-        memory = var.memory
+        limits = {
+          cpu    = var.cpu
+          memory = var.memory
+        }
       }
 
       # Set container port
@@ -65,9 +67,9 @@ resource "google_cloud_run_v2_service" "backend" {
 }
 
 # Make the backend service publicly accessible
-resource "google_cloud_run_service_iam_member" "backend_public" {
+resource "google_cloud_run_v2_service_iam_member" "backend_public" {
   location = google_cloud_run_v2_service.backend.location
-  service  = google_cloud_run_v2_service.backend.name
+  name = google_cloud_run_v2_service.backend.name
   role     = "roles/run.invoker"
   member   = "allUsers"
 }
@@ -77,7 +79,7 @@ resource "google_secret_manager_secret" "secure_session_key" {
   secret_id = "secure-session-key"
 
   replication {
-    automatic = true
+    auto {}
   }
 
   labels = var.labels

@@ -30,8 +30,10 @@ resource "google_cloud_run_v2_service" "frontend" {
 
       # Set resource limits
       resources {
-        cpu    = var.cpu
-        memory = var.memory
+        limits = {
+          cpu    = var.cpu
+          memory = var.memory
+        }
       }
 
       # Set container port
@@ -55,9 +57,9 @@ resource "google_cloud_run_v2_service" "frontend" {
 }
 
 # Make the frontend service publicly accessible
-resource "google_cloud_run_service_iam_member" "frontend_public" {
+resource "google_cloud_run_v2_service_iam_member" "frontend_public" {
   location = google_cloud_run_v2_service.frontend.location
-  service  = google_cloud_run_v2_service.frontend.name
+  name = google_cloud_run_v2_service.frontend.name
   role     = "roles/run.invoker"
   member   = "allUsers"
 }
