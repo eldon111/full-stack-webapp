@@ -12,12 +12,6 @@ resource "google_cloud_run_v2_service" "backend" {
     containers {
       image = "us-east4-docker.pkg.dev/${var.project_id}/cloud-run-source-deploy/${var.service_name}:latest"
 
-      # Set environment variables
-      env {
-        name = "PORT"
-        value = tostring(var.container_port)
-      }
-
       env {
         name  = "NODE_ENV"
         value = var.environment
@@ -44,11 +38,6 @@ resource "google_cloud_run_v2_service" "backend" {
           cpu    = var.cpu
           memory = var.memory
         }
-      }
-
-      # Set container port
-      ports {
-        container_port = var.container_port
       }
     }
 
