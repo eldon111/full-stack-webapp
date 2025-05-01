@@ -90,3 +90,6 @@ steps:
           echo "*******************************************************************************"
         fi
 # [END tf-apply]
+
+options:
+  defaultLogsBucketBehavior: REGIONAL_USER_OWNED_BUCKET
