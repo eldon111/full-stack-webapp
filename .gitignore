@@ -1,5 +1,6 @@
 /.idea/AugmentWebviewStateStore.xml
 /.idea/codeStyles
+.terraform/
 
 # Logs
 logs
