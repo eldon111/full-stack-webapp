@@ -65,7 +65,7 @@ resource "google_cloud_run_v2_service_iam_member" "backend_public" {
 
 # Create a secure session key in Secret Manager
 resource "google_secret_manager_secret" "secure_session_key" {
-  secret_id = "secure-session-key"
+  secret_id = "secure-session-key-${var.environment}"
 
   replication {
     auto {}
@@ -83,4 +83,17 @@ resource "random_id" "secure_session_key" {
 resource "google_secret_manager_secret_version" "secure_session_key" {
   secret      = google_secret_manager_secret.secure_session_key.id
   secret_data = random_id.secure_session_key.hex
+}
+
+# Instead of trying to automatically determine the current user,
+# we'll create a more permissive policy for the secret
+# This allows any user with the Secret Manager Admin role to access the secret
+resource "google_secret_manager_secret_iam_binding" "secret_accessor" {
+  secret_id = google_secret_manager_secret.secure_session_key.id
+  role      = "roles/secretmanager.secretAccessor"
+  members = [
+    "serviceAccount:${data.google_service_account.backend_service_account.email}",
+    # Add other members who need access to the secret here
+    # For example: "user:your-email@example.com"
+  ]
 }
