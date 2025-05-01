@@ -2,7 +2,7 @@
 
 import { PubSub } from '@google-cloud/pubsub';
 
-const pubsub = new PubSub({ projectId: 'avian-presence-455118-j3' });
+const pubsub = new PubSub();
 
 const thumbnailCreatedListeners: { [key: string]: (filename: string) => void } = {};
 
