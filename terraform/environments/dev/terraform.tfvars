@@ -1,5 +1,5 @@
 # Replace with your actual GCP project ID
-project_id = "avian-presence-455118-j3"
+project_id = "terraform-app-458517"
 region = "us-east4"
 
 # Service names
