@@ -98,9 +98,9 @@ steps:
     args:
       - 'build'
       - '-t'
-      - '${_REGION}-docker.pkg.dev/${PROJECT_ID}/cloud-run-source-deploy/${_BACKEND_SERVICE_NAME}:${SHORT_SHA}'
+      - '${_REGION}-docker.pkg.dev/${PROJECT_ID}/cloud-run-source-deploy/${_BACKEND_SERVICE_NAME}-${_ENVIRONMENT}:${SHORT_SHA}'
       - '-t'
-      - '${_REGION}-docker.pkg.dev/${PROJECT_ID}/cloud-run-source-deploy/${_BACKEND_SERVICE_NAME}:latest'
+      - '${_REGION}-docker.pkg.dev/${PROJECT_ID}/cloud-run-source-deploy/${_BACKEND_SERVICE_NAME}-${_ENVIRONMENT}:latest'
       - './backend'
 
   # Build and push frontend container
@@ -109,9 +109,9 @@ steps:
     args:
       - 'build'
       - '-t'
-      - '${_REGION}-docker.pkg.dev/${PROJECT_ID}/cloud-run-source-deploy/${_FRONTEND_SERVICE_NAME}:${SHORT_SHA}'
+      - '${_REGION}-docker.pkg.dev/${PROJECT_ID}/cloud-run-source-deploy/${_FRONTEND_SERVICE_NAME}-${_ENVIRONMENT}:${SHORT_SHA}'
       - '-t'
-      - '${_REGION}-docker.pkg.dev/${PROJECT_ID}/cloud-run-source-deploy/${_FRONTEND_SERVICE_NAME}:latest'
+      - '${_REGION}-docker.pkg.dev/${PROJECT_ID}/cloud-run-source-deploy/${_FRONTEND_SERVICE_NAME}-${_ENVIRONMENT}:latest'
       - './frontend'
 
   # Push backend container
@@ -119,38 +119,39 @@ steps:
     name: 'gcr.io/cloud-builders/docker'
     args:
       - 'push'
-      - '${_REGION}-docker.pkg.dev/${PROJECT_ID}/cloud-run-source-deploy/${_BACKEND_SERVICE_NAME}:${SHORT_SHA}'
+      - '${_REGION}-docker.pkg.dev/${PROJECT_ID}/cloud-run-source-deploy/${_BACKEND_SERVICE_NAME}-${_ENVIRONMENT}:${SHORT_SHA}'
 
   # Push frontend container
   - id: 'push-frontend'
     name: 'gcr.io/cloud-builders/docker'
     args:
       - 'push'
-      - '${_REGION}-docker.pkg.dev/${PROJECT_ID}/cloud-run-source-deploy/${_FRONTEND_SERVICE_NAME}:${SHORT_SHA}'
+      - '${_REGION}-docker.pkg.dev/${PROJECT_ID}/cloud-run-source-deploy/${_FRONTEND_SERVICE_NAME}-${_ENVIRONMENT}:${SHORT_SHA}'
 
   # Push latest tags
   - id: 'push-latest-tags'
     name: 'gcr.io/cloud-builders/docker'
     args:
       - 'push'
-      - '${_REGION}-docker.pkg.dev/${PROJECT_ID}/cloud-run-source-deploy/${_BACKEND_SERVICE_NAME}:latest'
+      - '${_REGION}-docker.pkg.dev/${PROJECT_ID}/cloud-run-source-deploy/${_BACKEND_SERVICE_NAME}-${_ENVIRONMENT}:latest'
 
   - id: 'push-latest-tags-frontend'
     name: 'gcr.io/cloud-builders/docker'
     args:
       - 'push'
-      - '${_REGION}-docker.pkg.dev/${PROJECT_ID}/cloud-run-source-deploy/${_FRONTEND_SERVICE_NAME}:latest'
+      - '${_REGION}-docker.pkg.dev/${PROJECT_ID}/cloud-run-source-deploy/${_FRONTEND_SERVICE_NAME}-${_ENVIRONMENT}:latest'
 
 # Images to be pushed to the container registry
 images:
-  - '${_REGION}-docker.pkg.dev/${PROJECT_ID}/cloud-run-source-deploy/${_BACKEND_SERVICE_NAME}:${SHORT_SHA}'
-  - '${_REGION}-docker.pkg.dev/${PROJECT_ID}/cloud-run-source-deploy/${_BACKEND_SERVICE_NAME}:latest'
-  - '${_REGION}-docker.pkg.dev/${PROJECT_ID}/cloud-run-source-deploy/${_FRONTEND_SERVICE_NAME}:${SHORT_SHA}'
-  - '${_REGION}-docker.pkg.dev/${PROJECT_ID}/cloud-run-source-deploy/${_FRONTEND_SERVICE_NAME}:latest'
+  - '${_REGION}-docker.pkg.dev/${PROJECT_ID}/cloud-run-source-deploy/${_BACKEND_SERVICE_NAME}-${_ENVIRONMENT}:${SHORT_SHA}'
+  - '${_REGION}-docker.pkg.dev/${PROJECT_ID}/cloud-run-source-deploy/${_BACKEND_SERVICE_NAME}-${_ENVIRONMENT}:latest'
+  - '${_REGION}-docker.pkg.dev/${PROJECT_ID}/cloud-run-source-deploy/${_FRONTEND_SERVICE_NAME}-${_ENVIRONMENT}:${SHORT_SHA}'
+  - '${_REGION}-docker.pkg.dev/${PROJECT_ID}/cloud-run-source-deploy/${_FRONTEND_SERVICE_NAME}-${_ENVIRONMENT}:latest'
 
 # Substitution variables
 substitutions:
   _REGION: 'us-east4'
+  _ENVIRONMENT: 'dev'
   _BACKEND_SERVICE_NAME: 'full-stack-webapp-backend'
   _FRONTEND_SERVICE_NAME: 'full-stack-webapp-frontend'
   _IMAGE_PROCESSOR_NAME: 'generate-thumbnail'
