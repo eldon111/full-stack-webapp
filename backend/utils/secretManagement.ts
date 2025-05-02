@@ -10,7 +10,7 @@ export async function accessSecret(name: String): Promise<string> {
 export async function accessSecretAsBuffer(name: String): Promise<Buffer> {
   const projectId = await getProjectId();
   const [version] = await secretManagerClient.accessSecretVersion({
-    name: `projects/${projectId}/secrets/${name}/versions/latest`,
+    name: `projects/${projectId}/secrets/${name}-${process.env.NODE_ENV}/versions/latest`,
   });
   return version.payload.data;
 }

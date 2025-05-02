@@ -12,7 +12,7 @@ RUN npm ci --only=production
 COPY dist/ ./dist/
 
 # Set environment variables
-ENV NODE_ENV=production
+#ENV NODE_ENV=production
 
 # Expose the port the app runs on
 EXPOSE 8080
