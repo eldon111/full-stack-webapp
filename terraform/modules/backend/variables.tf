@@ -33,6 +33,18 @@ variable "pubsub_subscription_name" {
   type        = string
 }
 
+variable "oauth_client_id" {
+  description = "OAuth client ID for Google authentication"
+  type        = string
+  sensitive   = true
+}
+
+variable "oauth_client_secret" {
+  description = "OAuth client secret for Google authentication"
+  type        = string
+  sensitive   = true
+}
+
 variable "labels" {
   description = "Labels to apply to resources"
   type = map(string)

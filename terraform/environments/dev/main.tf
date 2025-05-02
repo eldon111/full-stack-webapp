@@ -10,4 +10,5 @@ module "full_stack_webapp" {
   image_bucket_name        = "${var.image_bucket_name}-dev"
   pubsub_topic_name        = "${var.pubsub_topic_name}-dev"
   pubsub_subscription_name = "${var.pubsub_subscription_name}-dev"
+  support_email = var.support_email
 }

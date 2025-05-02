@@ -19,6 +19,21 @@ module "common" {
   labels                   = local.common_labels
 }
 
+# OAuth client module
+module "oauth_client" {
+  source = "./modules/oauth-client"
+
+  project_id            = var.project_id
+  environment           = var.environment
+  application_name      = "Full Stack Webapp"
+  support_email         = var.support_email
+  service_account_email = module.common.backend_service_account_email
+  labels = local.common_labels
+
+  # Dependencies
+  depends_on = [module.common]
+}
+
 # Backend module
 module "backend" {
   source = "./modules/backend"
@@ -30,10 +45,14 @@ module "backend" {
   image_bucket_name        = module.common.image_bucket_name
   pubsub_topic_name        = module.common.pubsub_topic_name
   pubsub_subscription_name = module.common.pubsub_subscription_name
+  # Use the OAuth client ID and secret from the oauth_client module
+  # No need to manually provide these values anymore
+  oauth_client_id     = ""
+  oauth_client_secret = ""
   labels = local.common_labels
 
   # Dependencies
-  depends_on = [module.common]
+  depends_on = [module.common, module.oauth_client]
 }
 
 # Frontend module

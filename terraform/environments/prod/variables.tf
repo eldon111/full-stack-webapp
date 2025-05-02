@@ -44,3 +44,8 @@ variable "pubsub_subscription_name" {
   type        = string
   default     = "thumbnail-created-sub"
 }
+
+variable "support_email" {
+  description = "Support email for the OAuth consent screen"
+  type        = string
+}
