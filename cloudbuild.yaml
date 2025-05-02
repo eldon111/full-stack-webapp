@@ -25,29 +25,38 @@ steps:
     args:
       - build
       - >-
-        $_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/$REPO_NAME/$_BE_SERVICE_NAME:$COMMIT_SHA
+        ${_REGION}-docker.pkg.dev/${PROJECT_ID}/cloud-run-source-deploy/${_BACKEND_SERVICE_NAME}:${SHORT_SHA}
       - '--builder=gcr.io/buildpacks/builder:latest'
       - '--network=cloudbuild'
       - '--path=backend'
     id: 'build-backend'
     entrypoint:
       pack
-  #  - id: 'build-backend'
-  #    name: 'node:22'
-  #    entrypoint: 'bash'
-  #    args:
-  #      - '-c'
-  #      - |
-  #        echo "Building backend..."
-  #        cd backend
-  #        npm run build
+
+  # Build backend TypeScript
+  - id: 'build-backend-typescript'
+    name: gcr.io/cloud-builders/npm
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        echo "Pushing backend routes lib..."
+        cd backend
+        npm i
+        npm run build
+
+  #  - name: 'gcr.io/cloud-builders/npm'
+  #    dir: 'dist/backend/routes'
+  #    args: [ 'run', 'artifactregistry-login' ]
+  #  - name: 'gcr.io/cloud-builders/npm'
+  #    args: [ 'publish', '${_PACKAGE}' ]
 
   # Build frontend
   - name: gcr.io/k8s-skaffold/pack
     args:
       - build
       - >-
-        $_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/$REPO_NAME/$_BE_SERVICE_NAME:$COMMIT_SHA
+        ${_REGION}-docker.pkg.dev/${PROJECT_ID}/cloud-run-source-deploy/${_FRONTEND_SERVICE_NAME}:${SHORT_SHA}
       - '--builder=gcr.io/buildpacks/builder:latest'
       - '--network=cloudbuild'
       - '--path=frontend'

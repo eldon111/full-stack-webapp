@@ -8,7 +8,7 @@ import Home from '@/pages/Home.tsx';
 import { TRPCProvider } from '@/utils/trpc.ts';
 import { useState } from 'react';
 import { createTRPCClient, createWSClient, httpLink, splitLink, TRPCClientErrorLike, wsLink } from '@trpc/client';
-import type { AppRouter } from '@terraform-app/backend-routes';
+import type { AppRouter } from '@backend/dist/routes/router';
 
 function makeQueryClient() {
   return new QueryClient({
