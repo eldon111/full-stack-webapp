@@ -1,5 +1,5 @@
 {
-  "name": "generate-thumbnail",
+  "name": "image-processor",
   "version": "1.0.0",
   "main": "dist/generateThumbnail.js",
   "scripts": {

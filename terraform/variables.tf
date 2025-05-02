@@ -30,7 +30,7 @@ variable "frontend_service_name" {
 variable "image_processor_name" {
   description = "Name of the image processor function"
   type        = string
-  default     = "generate-thumbnail"
+  default = "image-processor"
 }
 
 variable "image_bucket_name" {

@@ -154,7 +154,7 @@ substitutions:
   _ENVIRONMENT: 'dev'
   _BACKEND_SERVICE_NAME: 'full-stack-webapp-backend'
   _FRONTEND_SERVICE_NAME: 'full-stack-webapp-frontend'
-  _IMAGE_PROCESSOR_NAME: 'generate-thumbnail'
+  _IMAGE_PROCESSOR_NAME: 'image-processor'
 
 # Timeout for the build (30 minutes)
 timeout: '1800s'

@@ -5,7 +5,7 @@ region = "us-east4"
 # Service names
 backend_service_name  = "full-stack-webapp-backend"
 frontend_service_name = "full-stack-webapp-frontend"
-image_processor_name = "generate-thumbnail"
+image_processor_name = "image-processor"
 
 # Resource names
 image_bucket_name        = "eldons-full-stack-webapp-images"
