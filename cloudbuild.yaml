@@ -59,16 +59,38 @@ steps:
 
   # Create Cloud Function source archive
   - id: 'create-function-archive'
-    name: 'gcr.io/cloud-builders/gcloud'
+    name: 'debian:bullseye-slim'
     entrypoint: 'bash'
     args:
       - '-c'
       - |
         echo "Creating Cloud Function source archive..."
+        # Install zip package
+        apt-get update && apt-get install -y zip
+
         cd /workspace/deployables/image-processor
-        zip -r function-source.zip .
-        # Copy to GCS bucket for Cloud Function deployment
-        gsutil cp function-source.zip gs://gcf-sources-${PROJECT_ID}-${_REGION}/${_IMAGE_PROCESSOR_NAME}-source.zip
+        zip -r ${_IMAGE_PROCESSOR_NAME}-source.zip .
+        mkdir -p /workspace/artifacts
+        cp ${_IMAGE_PROCESSOR_NAME}-source.zip /workspace/artifacts/
+
+  # Create GCS bucket if it doesn't exist and upload function archive
+  - id: 'create-bucket-and-upload'
+    name: 'gcr.io/cloud-builders/gsutil'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        # Check if bucket exists, create it if it doesn't
+        if ! gsutil ls -b gs://gcf-sources-${PROJECT_ID}-${_REGION} &>/dev/null; then
+          echo "Creating bucket gs://gcf-sources-${PROJECT_ID}-${_REGION}..."
+          gsutil mb -l ${_REGION} gs://gcf-sources-${PROJECT_ID}-${_REGION}
+        else
+          echo "Bucket gs://gcf-sources-${PROJECT_ID}-${_REGION} already exists."
+        fi
+
+        # Upload the function source archive
+        echo "Uploading ${_IMAGE_PROCESSOR_NAME}-source.zip to bucket..."
+        gsutil cp /workspace/artifacts/${_IMAGE_PROCESSOR_NAME}-source.zip gs://gcf-sources-${PROJECT_ID}-${_REGION}/${_IMAGE_PROCESSOR_NAME}-source.zip
 
   # Build and push backend container
   - id: 'build-push-backend'
