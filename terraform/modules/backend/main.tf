@@ -82,7 +82,8 @@ resource "random_id" "secure_session_key" {
 # Store the secure session key in Secret Manager
 resource "google_secret_manager_secret_version" "secure_session_key" {
   secret      = google_secret_manager_secret.secure_session_key.id
-  secret_data = random_id.secure_session_key.hex
+  secret_data = random_id.secure_session_key.b64_std
+  is_secret_data_base64 = true
 }
 
 # Instead of trying to automatically determine the current user,

@@ -69,9 +69,9 @@ steps:
         apt-get update && apt-get install -y zip
 
         cd /workspace/deployables/image-processor
-        zip -r ${_IMAGE_PROCESSOR_NAME}-source.zip .
+        zip -r ${_IMAGE_PROCESSOR_NAME}-${_ENVIRONMENT}-source.zip .
         mkdir -p /workspace/artifacts
-        cp ${_IMAGE_PROCESSOR_NAME}-source.zip /workspace/artifacts/
+        cp ${_IMAGE_PROCESSOR_NAME}-${_ENVIRONMENT}-source.zip /workspace/artifacts/
 
   # Create GCS bucket if it doesn't exist and upload function archive
   - id: 'create-bucket-and-upload'
@@ -89,8 +89,8 @@ steps:
         fi
 
         # Upload the function source archive
-        echo "Uploading ${_IMAGE_PROCESSOR_NAME}-source.zip to bucket..."
-        gsutil cp /workspace/artifacts/${_IMAGE_PROCESSOR_NAME}-source.zip gs://gcf-sources-${PROJECT_ID}-${_REGION}/${_IMAGE_PROCESSOR_NAME}-source.zip
+        echo "Uploading ${_IMAGE_PROCESSOR_NAME}-${_ENVIRONMENT}-source.zip to bucket..."
+        gsutil cp /workspace/artifacts/${_IMAGE_PROCESSOR_NAME}-${_ENVIRONMENT}-source.zip gs://gcf-sources-${PROJECT_ID}-${_REGION}/${_IMAGE_PROCESSOR_NAME}-${_ENVIRONMENT}-source.zip
 
   # Build and push backend container
   - id: 'build-push-backend'

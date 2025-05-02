@@ -15,7 +15,7 @@ resource "google_cloudfunctions2_function" "image_processor" {
     source {
       storage_source {
         bucket = "gcf-sources-${var.project_id}-${var.region}"
-        object = "image-processor-source.zip"
+        object = "${var.function_name}-source.zip"
       }
     }
   }
@@ -41,12 +41,6 @@ resource "google_cloudfunctions2_function" "image_processor" {
     event_filters {
       attribute = "bucket"
       value     = var.image_bucket_name
-    }
-
-    event_filters {
-      attribute = "name"
-      value     = ".*/uploads/.*"
-      operator  = "match-path-pattern"
     }
   }
 
