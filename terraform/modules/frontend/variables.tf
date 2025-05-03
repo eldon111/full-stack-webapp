@@ -29,12 +29,6 @@ variable "labels" {
   default = {}
 }
 
-variable "container_port" {
-  description = "Port the container listens on"
-  type        = number
-  default     = 5173
-}
-
 variable "min_instances" {
   description = "Minimum number of instances"
   type        = number
