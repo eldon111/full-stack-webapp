@@ -2,7 +2,6 @@
 project_id = "terraform-app-458517"
 project_number = "458517"
 region     = "us-east4"
-support_email = "eldon@emathias.com"
 
 # Service names
 backend_service_name  = "full-stack-webapp-backend"
