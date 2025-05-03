@@ -18,7 +18,7 @@ resource "google_cloud_run_v2_service" "frontend" {
       }
 
       env {
-        name  = "VITE_API_URL"
+        name = "VITE_REACT_APP_API_BASE_URL"
         value = "${var.backend_url}/api"
       }
 
