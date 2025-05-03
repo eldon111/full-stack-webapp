@@ -1,6 +1,6 @@
 # Replace with your actual GCP project ID and number
 project_id = "terraform-app-458517"
-project_number = "458517"
+project_number = "207891619672"
 region     = "us-east4"
 
 # Service names

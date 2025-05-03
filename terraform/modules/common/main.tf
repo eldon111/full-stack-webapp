@@ -1,5 +1,19 @@
+# Enable required Google Cloud APIs
+resource "google_project_service" "storage_api" {
+  project            = var.project_id
+  service            = "storage.googleapis.com"
+  disable_on_destroy = false
+}
+
+resource "google_project_service" "pubsub_api" {
+  project            = var.project_id
+  service            = "pubsub.googleapis.com"
+  disable_on_destroy = false
+}
+
 # Create a GCS bucket for storing images
 resource "google_storage_bucket" "images" {
+  depends_on = [google_project_service.storage_api]
   name = var.image_bucket_name
   location = var.region
 
@@ -30,6 +44,7 @@ resource "google_storage_bucket" "images" {
 
 # Create a PubSub topic for thumbnail notifications
 resource "google_pubsub_topic" "thumbnail_created" {
+  depends_on = [google_project_service.pubsub_api]
   name   = var.pubsub_topic_name
   labels = var.labels
 }
@@ -122,4 +137,10 @@ resource "google_project_iam_member" "storage_pubsub_publisher" {
   project = var.project_id
   role    = "roles/pubsub.publisher"
   member  = "serviceAccount:service-${var.project_number}@gs-project-accounts.iam.gserviceaccount.com"
+
+  # Make sure the required APIs are enabled before trying to grant permissions
+  depends_on = [
+    google_project_service.storage_api,
+    google_project_service.pubsub_api
+  ]
 }
