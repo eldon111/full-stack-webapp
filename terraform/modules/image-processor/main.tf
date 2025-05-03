@@ -37,6 +37,7 @@ resource "google_cloudfunctions2_function" "image_processor" {
   event_trigger {
     trigger_region = var.region
     event_type     = "google.cloud.storage.object.v1.finalized"
+    retry_policy = "RETRY_POLICY_DO_NOT_RETRY"
 
     event_filters {
       attribute = "bucket"
