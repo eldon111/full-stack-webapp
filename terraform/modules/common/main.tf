@@ -115,3 +115,11 @@ resource "google_project_iam_member" "image_processor_pubsub_publisher" {
   role    = "roles/pubsub.publisher"
   member  = "serviceAccount:${google_service_account.image_processor_service_account.email}"
 }
+
+# Grant the Cloud Storage service account permission to publish to Pub/Sub
+# This is needed for Cloud Storage triggers to work with Cloud Functions
+resource "google_project_iam_member" "storage_pubsub_publisher" {
+  project = var.project_id
+  role    = "roles/pubsub.publisher"
+  member  = "serviceAccount:service-${var.project_number}@gs-project-accounts.iam.gserviceaccount.com"
+}

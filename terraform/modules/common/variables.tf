@@ -33,3 +33,8 @@ variable "labels" {
   type = map(string)
   default = {}
 }
+
+variable "project_number" {
+  description = "The GCP project number"
+  type        = string
+}

@@ -1,5 +1,6 @@
-# Replace with your actual GCP project ID
+# Replace with your actual GCP project ID and number
 project_id = "terraform-app-458517"
+project_number = "458517"
 region     = "us-east4"
 support_email = "eldon@emathias.com"
 

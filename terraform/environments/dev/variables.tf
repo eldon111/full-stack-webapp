@@ -49,3 +49,8 @@ variable "support_email" {
   description = "Support email for the OAuth consent screen"
   type        = string
 }
+
+variable "project_number" {
+  description = "The GCP project number"
+  type        = string
+}

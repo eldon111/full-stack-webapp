@@ -2,6 +2,7 @@ module "full_stack_webapp" {
   source = "../../"
 
   project_id               = var.project_id
+  project_number = var.project_number
   region                   = var.region
   environment              = "dev"
   backend_service_name     = "${var.backend_service_name}-dev"

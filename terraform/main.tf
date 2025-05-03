@@ -11,6 +11,7 @@ module "common" {
   source = "./modules/common"
 
   project_id               = var.project_id
+  project_number = var.project_number
   region                   = var.region
   environment              = var.environment
   image_bucket_name        = var.image_bucket_name
