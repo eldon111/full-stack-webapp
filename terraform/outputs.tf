@@ -5,7 +5,7 @@ output "backend_url" {
 
 output "frontend_url" {
   description = "URL of the frontend service"
-  value       = module.frontend.frontend_url
+  value = module.frontend_static.frontend_url
 }
 
 output "image_bucket_name" {

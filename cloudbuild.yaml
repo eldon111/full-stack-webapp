@@ -30,15 +30,19 @@ steps:
         cd backend
         npm run build
 
-  # Build frontend
-  - id: 'build-frontend'
+  # Build frontend for static hosting
+  - id: 'build-frontend-static'
     name: 'node:22'
     entrypoint: 'bash'
     args:
       - '-c'
       - |
-        echo "Building frontend..."
+        echo "Building frontend for static hosting..."
         cd frontend
+        # Set environment variables for runtime config
+        export NODE_ENV=${_ENVIRONMENT}
+        export VITE_REACT_APP_API_BASE_URL="${_BACKEND_URL}"
+        # Build the static website
         npm run build
 
   # Create Cloud Function source archive
@@ -51,13 +55,13 @@ steps:
         echo "Creating Cloud Function source archive..."
         # Install zip package
         apt-get update && apt-get install -y zip
-        
+
         cd image-processor
         # Create a directory for the deployable
         mkdir -p /workspace/deployables/image-processor
         # Copy necessary files for deployment
         cp -r *.ts tsconfig.json package.json package-lock.json /workspace/deployables/image-processor/
-        
+
         cd /workspace/deployables/image-processor
         zip -r ${_IMAGE_PROCESSOR_NAME}-${_ENVIRONMENT}-source.zip .
         mkdir -p /workspace/artifacts
@@ -93,16 +97,25 @@ steps:
       - '${_REGION}-docker.pkg.dev/${PROJECT_ID}/cloud-run-source-deploy/${_BACKEND_SERVICE_NAME}-${_ENVIRONMENT}:latest'
       - './backend'
 
-  # Build and push frontend container
-  - id: 'build-push-frontend'
-    name: 'gcr.io/cloud-builders/docker'
+  # Deploy frontend static website to GCS bucket
+  - id: 'deploy-frontend-static'
+    name: 'gcr.io/cloud-builders/gsutil'
+    entrypoint: 'bash'
     args:
-      - 'build'
-      - '-t'
-      - '${_REGION}-docker.pkg.dev/${PROJECT_ID}/cloud-run-source-deploy/${_FRONTEND_SERVICE_NAME}-${_ENVIRONMENT}:${SHORT_SHA}'
-      - '-t'
-      - '${_REGION}-docker.pkg.dev/${PROJECT_ID}/cloud-run-source-deploy/${_FRONTEND_SERVICE_NAME}-${_ENVIRONMENT}:latest'
-      - './frontend'
+      - '-c'
+      - |
+        echo "Deploying frontend static website to GCS bucket..."
+        # Deploy to GCS bucket
+        gsutil -m rsync -d -r frontend/dist gs://${_FRONTEND_STATIC_BUCKET}
+
+        # Set Cache-Control metadata for static assets
+        echo "Setting Cache-Control metadata for static assets..."
+        gsutil -m setmeta -h "Cache-Control:public, max-age=31536000" gs://${_FRONTEND_STATIC_BUCKET}/assets/**
+
+        # Set Cache-Control metadata for index.html and config.js (no caching)
+        echo "Setting Cache-Control metadata for index.html and config.js..."
+        gsutil setmeta -h "Cache-Control:no-cache, no-store, must-revalidate" gs://${_FRONTEND_STATIC_BUCKET}/index.html
+        gsutil setmeta -h "Cache-Control:no-cache, no-store, must-revalidate" gs://${_FRONTEND_STATIC_BUCKET}/config.js
 
   # Push backend container
   - id: 'push-backend'
@@ -111,32 +124,17 @@ steps:
       - 'push'
       - '${_REGION}-docker.pkg.dev/${PROJECT_ID}/cloud-run-source-deploy/${_BACKEND_SERVICE_NAME}-${_ENVIRONMENT}:${SHORT_SHA}'
 
-  # Push frontend container
-  - id: 'push-frontend'
-    name: 'gcr.io/cloud-builders/docker'
-    args:
-      - 'push'
-      - '${_REGION}-docker.pkg.dev/${PROJECT_ID}/cloud-run-source-deploy/${_FRONTEND_SERVICE_NAME}-${_ENVIRONMENT}:${SHORT_SHA}'
-
-  # Push latest tags
+  # Push latest tags for backend
   - id: 'push-latest-tags'
     name: 'gcr.io/cloud-builders/docker'
     args:
       - 'push'
       - '${_REGION}-docker.pkg.dev/${PROJECT_ID}/cloud-run-source-deploy/${_BACKEND_SERVICE_NAME}-${_ENVIRONMENT}:latest'
 
-  - id: 'push-latest-tags-frontend'
-    name: 'gcr.io/cloud-builders/docker'
-    args:
-      - 'push'
-      - '${_REGION}-docker.pkg.dev/${PROJECT_ID}/cloud-run-source-deploy/${_FRONTEND_SERVICE_NAME}-${_ENVIRONMENT}:latest'
-
 # Images to be pushed to the container registry
 images:
   - '${_REGION}-docker.pkg.dev/${PROJECT_ID}/cloud-run-source-deploy/${_BACKEND_SERVICE_NAME}-${_ENVIRONMENT}:${SHORT_SHA}'
   - '${_REGION}-docker.pkg.dev/${PROJECT_ID}/cloud-run-source-deploy/${_BACKEND_SERVICE_NAME}-${_ENVIRONMENT}:latest'
-  - '${_REGION}-docker.pkg.dev/${PROJECT_ID}/cloud-run-source-deploy/${_FRONTEND_SERVICE_NAME}-${_ENVIRONMENT}:${SHORT_SHA}'
-  - '${_REGION}-docker.pkg.dev/${PROJECT_ID}/cloud-run-source-deploy/${_FRONTEND_SERVICE_NAME}-${_ENVIRONMENT}:latest'
 
 # Substitution variables
 substitutions:
@@ -145,6 +143,8 @@ substitutions:
   _BACKEND_SERVICE_NAME: 'full-stack-webapp-backend'
   _FRONTEND_SERVICE_NAME: 'full-stack-webapp-frontend'
   _IMAGE_PROCESSOR_NAME: 'image-processor'
+  _FRONTEND_STATIC_BUCKET: '${_FRONTEND_SERVICE_NAME}-${_ENVIRONMENT}-static'
+  _BACKEND_URL: 'https://${_BACKEND_SERVICE_NAME}-${_ENVIRONMENT}-${PROJECT_NUMBER}.${_REGION}.run.app'
 
 # Timeout for the build (30 minutes)
 timeout: '1800s'

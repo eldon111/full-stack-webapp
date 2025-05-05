@@ -1,0 +1,112 @@
+# Create a GCS bucket for hosting the static website
+resource "google_storage_bucket" "frontend_static" {
+  name = "${var.service_name}-static"
+  location = var.region
+
+  # Enable website hosting
+  website {
+    main_page_suffix = "index.html"
+    not_found_page   = "index.html" # For SPA routing, redirect all 404s to index.html
+  }
+
+  # Configure uniform bucket-level access
+  uniform_bucket_level_access = true
+
+  # Set storage class to standard
+  storage_class = "STANDARD"
+
+  # Add CORS configuration for API requests
+  cors {
+    origin = ["*"]
+    method = ["GET", "HEAD", "OPTIONS"]
+    response_header = ["Content-Type", "Access-Control-Allow-Origin"]
+    max_age_seconds = 3600
+  }
+
+  # Add labels
+  labels = var.labels
+
+  # Allow public access and cleanup on destroy
+  force_destroy = true
+}
+
+# Make the bucket publicly accessible
+resource "google_storage_bucket_iam_member" "frontend_static_public" {
+  bucket = google_storage_bucket.frontend_static.name
+  role   = "roles/storage.objectViewer"
+  member = "allUsers"
+}
+
+# Create a load balancer with HTTPS for the static website
+resource "google_compute_backend_bucket" "frontend_static" {
+  name        = "${var.service_name}-backend"
+  bucket_name = google_storage_bucket.frontend_static.name
+  enable_cdn  = true
+
+  cdn_policy {
+    cache_mode        = "CACHE_ALL_STATIC"
+    client_ttl        = 3600
+    default_ttl       = 3600
+    max_ttl           = 86400
+    negative_caching  = true
+    serve_while_stale = 86400
+  }
+}
+
+# Reserve a static external IP address
+resource "google_compute_global_address" "frontend_static" {
+  name = "${var.service_name}-ip"
+}
+
+# Create a URL map
+resource "google_compute_url_map" "frontend_static" {
+  name            = "${var.service_name}-url-map"
+  default_service = google_compute_backend_bucket.frontend_static.id
+
+  # For SPA routing, we'll use the default_service to serve index.html for all paths
+  # that don't match specific path rules
+}
+
+# Create an HTTP target proxy
+resource "google_compute_target_http_proxy" "frontend_static" {
+  name    = "${var.service_name}-http-proxy"
+  url_map = google_compute_url_map.frontend_static.id
+}
+
+# Create a global forwarding rule for HTTP
+resource "google_compute_global_forwarding_rule" "frontend_static_http" {
+  name       = "${var.service_name}-http-rule"
+  target     = google_compute_target_http_proxy.frontend_static.id
+  port_range = "80"
+  ip_address = google_compute_global_address.frontend_static.address
+}
+
+# Set up HTTPS with a managed certificate
+# Only create the certificate if a domain name is provided
+resource "google_compute_managed_ssl_certificate" "frontend_static" {
+  count = var.frontend_domain_name != "" ? 1 : 0
+
+  name = "${var.service_name}-cert"
+  managed {
+    domains = [var.frontend_domain_name]
+  }
+}
+
+# Create an HTTPS target proxy with the SSL certificate
+resource "google_compute_target_https_proxy" "frontend_static" {
+  count = var.frontend_domain_name != "" ? 1 : 0
+
+  name    = "${var.service_name}-https-proxy"
+  url_map = google_compute_url_map.frontend_static.id
+  ssl_certificates = [google_compute_managed_ssl_certificate.frontend_static[0].id]
+}
+
+# Create a global forwarding rule for HTTPS
+resource "google_compute_global_forwarding_rule" "frontend_static_https" {
+  count = var.frontend_domain_name != "" ? 1 : 0
+
+  name       = "${var.service_name}-https-rule"
+  target     = google_compute_target_https_proxy.frontend_static[0].id
+  port_range = "443"
+  ip_address = google_compute_global_address.frontend_static.address
+}

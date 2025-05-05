@@ -31,6 +31,9 @@ const appService: FastifyPluginAsync = async (server: FastifyInstance) => {
     expiry: 24 * 60 * 60, // Default 1 day
     cookie: {
       path: '/',
+      sameSite: 'none', // Allow cross-site cookies
+      secure: true, // Required when sameSite is 'none'
+      httpOnly: true, // Prevent JavaScript access to the cookie
     },
   });
 
@@ -54,19 +57,27 @@ const appService: FastifyPluginAsync = async (server: FastifyInstance) => {
     origin: (origin, cb) => {
       server.log.info('CORS origin: ', origin);
       if (!origin) {
-        // TODO: better handling of missing origin
-        // return cb(new Error("Not allowed"), false)
+        // Allow requests with no origin (like mobile apps, curl, etc)
         return cb(null, true);
       }
-      const hostname = new URL(origin).hostname;
-      if (hostname === 'localhost') {
-        server.log.info('localhost, no CORS protection');
-        //  Request from localhost will pass
-        cb(null, true);
-      } else {
-        //   Generate an error on other origins, disabling access
-        cb(new Error('Not allowed'), false);
+
+      // Allow all origins in development and production
+      // This is necessary for the static website to communicate with the backend
+      return cb(null, true);
+
+      // If you want to restrict to specific domains later, uncomment this code:
+      /*
+      const allowedOrigins = [
+        'http://localhost:5173',
+        'https://full-stack-webapp-frontend-dev-static.example.com',
+        'https://full-stack-webapp-frontend-static.example.com'
+      ];
+
+      if (allowedOrigins.includes(origin)) {
+        return cb(null, true);
       }
+      return cb(new Error('Not allowed by CORS'), false);
+      */
     },
   });
 

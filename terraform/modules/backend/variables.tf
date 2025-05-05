@@ -62,3 +62,8 @@ variable "memory" {
   type        = string
   default     = "512Mi"
 }
+
+variable "frontend_url" {
+  description = "URL of the frontend service for CORS and redirects"
+  type        = string
+}

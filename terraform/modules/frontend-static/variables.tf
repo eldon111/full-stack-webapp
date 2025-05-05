@@ -29,26 +29,9 @@ variable "labels" {
   default = {}
 }
 
-variable "min_instances" {
-  description = "Minimum number of instances"
-  type        = number
-  default     = 0
-}
-
-variable "max_instances" {
-  description = "Maximum number of instances"
-  type        = number
-  default     = 10
-}
-
-variable "cpu" {
-  description = "CPU allocation for the service"
+# Domain name variable for HTTPS setup
+variable "frontend_domain_name" {
+  description = "Domain name for the frontend (for HTTPS setup)"
   type        = string
-  default     = "1"
-}
-
-variable "memory" {
-  description = "Memory allocation for the service"
-  type        = string
-  default     = "512Mi"
+  default     = ""  # Default to empty, but should be provided for production
 }

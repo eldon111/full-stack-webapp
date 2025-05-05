@@ -32,6 +32,11 @@ resource "google_cloud_run_v2_service" "backend" {
         value = var.pubsub_subscription_name
       }
 
+      env {
+        name  = "FRONTEND_URL"
+        value = var.frontend_url
+      }
+
       # Set resource limits
       resources {
         limits = {

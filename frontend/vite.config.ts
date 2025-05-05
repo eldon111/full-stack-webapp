@@ -24,5 +24,22 @@ export default defineConfig(({ mode }) => {
       port: parseInt(env.PORT || '4173', 10),
       host: true, // Listen on all addresses
     },
+    build: {
+      // Optimize build for static hosting
+      outDir: 'dist',
+      emptyOutDir: true,
+      sourcemap: false,
+      // Generate a manifest file for asset management
+      manifest: true,
+      // Optimize chunk size
+      chunkSizeWarningLimit: 1000,
+      rollupOptions: {
+        output: {
+          manualChunks: {
+            vendor: ['react', 'react-dom', 'react-router', '@tanstack/react-query', '@trpc/client', '@trpc/server'],
+          },
+        },
+      },
+    },
   };
 });

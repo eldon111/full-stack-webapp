@@ -49,3 +49,9 @@ variable "project_number" {
   description = "The GCP project number"
   type        = string
 }
+
+variable "frontend_domain_name" {
+  description = "The base URL for the frontend without protocol"
+  type        = string
+  default     = "webapp.emathias.com"
+}

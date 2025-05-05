@@ -28,9 +28,5 @@
         "./../backend/*"
       ]
     }
-  },
-  "include": [
-    "src",
-    "../backend/routes/router.ts"
-  ]
+  }
 }

@@ -31,21 +31,25 @@ module "backend" {
   image_bucket_name        = module.common.image_bucket_name
   pubsub_topic_name        = module.common.pubsub_topic_name
   pubsub_subscription_name = module.common.pubsub_subscription_name
+  # Use a constructed frontend URL instead of a module reference to avoid circular dependencies
+  # frontend_url             = "https://${var.frontend_service_name}-${var.environment}-static.web.app"
+  frontend_url = "https://webapp.emathias.com"
   labels = local.common_labels
 
   # Dependencies
   depends_on = [module.common]
 }
 
-# Frontend module
-module "frontend" {
-  source = "./modules/frontend"
+# Frontend static website module
+module "frontend_static" {
+  source = "./modules/frontend-static"
 
   project_id   = var.project_id
   region       = var.region
   environment  = var.environment
   service_name = var.frontend_service_name
   backend_url  = module.backend.backend_url
+  frontend_domain_name = var.frontend_domain_name
   labels = local.common_labels
 
   # Dependencies

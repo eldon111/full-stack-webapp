@@ -38,6 +38,22 @@ resource "google_storage_bucket" "images" {
     }
   }
 
+  # Add CORS configuration for direct uploads
+  cors {
+    origin = ["*"]  # Allow all origins
+    method = ["GET", "HEAD", "PUT", "POST", "DELETE"]  # Allow all methods needed for uploads
+    response_header = [
+      "Content-Type",
+      "Access-Control-Allow-Origin",
+      "Access-Control-Allow-Methods",
+      "Access-Control-Allow-Headers",
+      "Access-Control-Max-Age",
+      "Content-Length",
+      "Content-Disposition"
+    ]
+    max_age_seconds = 3600
+  }
+
   # Add labels
   labels = var.labels
 }

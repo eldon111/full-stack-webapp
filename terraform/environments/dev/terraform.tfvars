@@ -1,7 +1,7 @@
 # Replace with your actual GCP project ID and number
-project_id = "terraform-app-458517"
+project_id     = "terraform-app-458517"
 project_number = "207891619672"
-region     = "us-east4"
+region         = "us-east4"
 
 # Service names
 backend_service_name  = "full-stack-webapp-backend"
@@ -12,3 +12,6 @@ image_processor_name = "image-processor"
 image_bucket_name        = "eldons-full-stack-webapp-images"
 pubsub_topic_name        = "thumbnail-created"
 pubsub_subscription_name = "thumbnail-created-sub"
+
+# Domain name for HTTPS (replace with your actual domain for dev environment)
+frontend_domain_name = "dev.webapp.emathias.com"

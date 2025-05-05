@@ -55,3 +55,9 @@ variable "project_number" {
   description = "The GCP project number"
   type        = string
 }
+
+variable "frontend_domain_name" {
+  description = "Domain name for the frontend static website (for HTTPS setup)"
+  type        = string
+  default     = ""  # Default to empty, should be provided in environment-specific tfvars
+}
