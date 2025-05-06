@@ -31,10 +31,8 @@ module "backend" {
   image_bucket_name        = module.common.image_bucket_name
   pubsub_topic_name        = module.common.pubsub_topic_name
   pubsub_subscription_name = module.common.pubsub_subscription_name
-  # Use a constructed frontend URL instead of a module reference to avoid circular dependencies
-  # frontend_url             = "https://${var.frontend_service_name}-${var.environment}-static.web.app"
-  frontend_url = "https://webapp.emathias.com"
-  labels = local.common_labels
+  frontend_url             = var.frontend_url
+  labels                   = local.common_labels
 
   # Dependencies
   depends_on = [module.common]
@@ -50,8 +48,8 @@ module "frontend_static" {
   service_name = var.frontend_service_name
   backend_url  = module.backend.backend_url
   frontend_domain_name = var.frontend_domain_name
-  manage_dns = var.manage_dns
-  labels = local.common_labels
+  manage_dns   = var.manage_dns
+  labels       = local.common_labels
 
   # Dependencies
   depends_on = [module.backend]

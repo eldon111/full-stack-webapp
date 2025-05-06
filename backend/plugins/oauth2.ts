@@ -24,6 +24,7 @@ async function oauthPlugin(fastify: FastifyInstance) {
       issuer: 'https://accounts.google.com',
     },
     callbackUri: (req) => {
+      console.log(req);
       return req.port
         ? `${req.protocol}://${req.hostname}:${req.port}/login/google/callback`
         : `${req.protocol}://${req.hostname}/login/google/callback`;

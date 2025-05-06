@@ -62,6 +62,12 @@ variable "frontend_domain_name" {
   default     = ""  # Default to empty, should be provided in environment-specific tfvars
 }
 
+variable "frontend_url" {
+  description = "Full URL for the frontend static website"
+  type        = string
+  default     = ""  # Default to empty, should be provided in environment-specific tfvars
+}
+
 variable "manage_dns" {
   description = "Whether to create and manage DNS records in Cloud DNS"
   type        = bool

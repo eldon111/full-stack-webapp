@@ -11,7 +11,7 @@ import fastifyCookie from '@fastify/cookie';
 import { Token } from '@fastify/oauth2';
 import { accessSecretAsBuffer } from './utils/secretManagement';
 import { fastifyTRPCPlugin, FastifyTRPCPluginOptions } from '@trpc/server/adapters/fastify';
-import { AppRouter, appRouter } from './routes/router';
+import { AppRouter, appRouter } from './routes';
 import { createContext } from './trpc';
 import ws from '@fastify/websocket';
 

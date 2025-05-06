@@ -53,7 +53,6 @@ variable "project_number" {
 variable "frontend_domain_name" {
   description = "The base URL for the frontend without protocol"
   type        = string
-  default     = "webapp.emathias.com"
 }
 
 variable "manage_dns" {
