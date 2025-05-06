@@ -15,3 +15,7 @@ pubsub_subscription_name = "thumbnail-created-sub"
 
 # Domain name for HTTPS (replace with your actual domain for dev environment)
 frontend_domain_name = "dev.webapp.emathias.com"
+
+# Set to true if you want Terraform to manage DNS records in Cloud DNS
+# Set to false if you're managing DNS elsewhere (e.g., external DNS provider)
+manage_dns = false

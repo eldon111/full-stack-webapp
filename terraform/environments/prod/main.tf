@@ -11,4 +11,6 @@ module "full_stack_webapp" {
   image_bucket_name        = var.image_bucket_name
   pubsub_topic_name        = var.pubsub_topic_name
   pubsub_subscription_name = var.pubsub_subscription_name
+  frontend_domain_name     = var.frontend_domain_name
+  manage_dns               = var.manage_dns
 }

@@ -35,3 +35,10 @@ variable "frontend_domain_name" {
   type        = string
   default     = ""  # Default to empty, but should be provided for production
 }
+
+# Whether to manage DNS records in Cloud DNS
+variable "manage_dns" {
+  description = "Whether to create and manage DNS records in Cloud DNS"
+  type        = bool
+  default     = false  # Default to false, set to true if you want Terraform to manage DNS
+}

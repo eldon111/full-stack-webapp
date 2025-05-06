@@ -50,6 +50,7 @@ module "frontend_static" {
   service_name = var.frontend_service_name
   backend_url  = module.backend.backend_url
   frontend_domain_name = var.frontend_domain_name
+  manage_dns = var.manage_dns
   labels = local.common_labels
 
   # Dependencies

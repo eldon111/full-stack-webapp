@@ -55,3 +55,9 @@ variable "frontend_domain_name" {
   type        = string
   default     = "webapp.emathias.com"
 }
+
+variable "manage_dns" {
+  description = "Whether to create and manage DNS records in Cloud DNS"
+  type        = bool
+  default     = false
+}
