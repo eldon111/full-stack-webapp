@@ -134,6 +134,13 @@ resource "google_project_iam_member" "backend_secretmanager_accessor" {
   member  = "serviceAccount:${google_service_account.backend_service_account.email}"
 }
 
+# Grant token creator role to allow signing URLs
+resource "google_project_iam_member" "backend_token_creator" {
+  project = var.project_id
+  role    = "roles/iam.serviceAccountTokenCreator"
+  member  = "serviceAccount:${google_service_account.backend_service_account.email}"
+}
+
 # Grant permissions to the image processor service account
 resource "google_project_iam_member" "image_processor_storage_admin" {
   project = var.project_id
