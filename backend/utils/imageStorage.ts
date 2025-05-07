@@ -1,8 +1,6 @@
 import { Bucket, GetSignedUrlConfig, Storage } from '@google-cloud/storage';
 import { UserInfo } from '../trpc';
 
-const IMAGE_BUCKET_NAME = 'eldons-full-stack-webapp-images';
-
 // Initialize Google Cloud Storage Client
 const storage = new Storage();
 
@@ -24,13 +22,13 @@ async function listFilenames(namespace: string): Promise<string[]> {
     prefix: namespace,
   };
 
-  const bucket = getBucketByName(IMAGE_BUCKET_NAME);
+  const bucket = getBucketByName(process.env.GCS_BUCKET!);
   const [files] = await bucket.getFiles(options);
   return files.map((file) => file.name);
 }
 
 async function generateImageUrl(fileName: string, action: 'read' | 'write' | 'delete' | 'resumable'): Promise<string> {
-  const bucket = getBucketByName(IMAGE_BUCKET_NAME);
+  const bucket = getBucketByName(process.env.GCS_BUCKET!);
 
   // These options will allow temporary read access to the file
   const options: GetSignedUrlConfig = {

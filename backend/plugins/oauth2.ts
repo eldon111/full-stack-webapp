@@ -24,13 +24,14 @@ async function oauthPlugin(fastify: FastifyInstance) {
       issuer: 'https://accounts.google.com',
     },
     callbackUri: (req) => {
+      console.log(req);
       return req.port
-        ? `${req.protocol}://${req.hostname}:${req.port}/login/google/callback`
-        : `${req.protocol}://${req.hostname}/login/google/callback`;
+        ? `https://${req.hostname}:${req.port}/login/google/callback`
+        : `https://${req.hostname}/login/google/callback`;
     },
   });
 
-  fastify.get('/login/google', { cors: false }, async (request, reply) => {
+  fastify.get('/login/google', async (request, reply) => {
     reply.redirect(await fastify.googleOAuth2.generateAuthorizationUri(request, reply));
   });
 
@@ -50,21 +51,27 @@ async function oauthPlugin(fastify: FastifyInstance) {
         }
         console.log('userInfo: ', userinfo);
         request.session.set('userInfo', userinfo);
-        reply.redirect(process.env.FRONTEND_URL || '/');
+        // Redirect to the static website after successful login
+        const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+        reply.redirect(frontendUrl);
       });
     });
   });
 
-  fastify.get('/logout', { cors: false }, async (request, reply) => {
+  fastify.get('/logout', async (request, reply) => {
     const token = getCurrentToken(request);
-    if (!token) return reply.redirect(request.headers.referer || '/');
+    if (!token) {
+      const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+      return reply.redirect(frontendUrl);
+    }
     try {
       await fastify.googleOAuth2.revokeToken(token, 'access_token', undefined);
     } catch (e) {
       console.error(e);
     }
     request.session.delete();
-    reply.redirect(process.env.FRONTEND_URL || '/');
+    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+    reply.redirect(frontendUrl);
   });
 }
 

@@ -8,7 +8,7 @@ import Home from '@/pages/Home.tsx';
 import { TRPCProvider } from '@/utils/trpc.ts';
 import { useState } from 'react';
 import { createTRPCClient, createWSClient, httpLink, splitLink, TRPCClientErrorLike, wsLink } from '@trpc/client';
-import type { AppRouter } from '@emathias-web-app/backend-routes';
+import type { AppRouter } from '@backend/routes/router';
 
 function makeQueryClient() {
   return new QueryClient({

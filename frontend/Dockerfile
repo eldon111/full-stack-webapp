@@ -22,9 +22,9 @@ ENV PYTHONPATH=${PYTHONPATH}:${PWD}
 RUN npm install -g serve
 
 # Install all the node modules required by the React app
-RUN npm install
+#RUN npm install
 # Build the React app
-RUN npm run build
+#RUN npm run build
 
 # Serve the 'build' directory on port 8080 using 'serve'
 CMD ["serve", "-s", "-l", "8080", "./dist"]
