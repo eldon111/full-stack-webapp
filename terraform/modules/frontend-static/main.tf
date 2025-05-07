@@ -50,6 +50,12 @@ resource "google_compute_backend_bucket" "frontend_static" {
     max_ttl           = 86400
     negative_caching  = true
     serve_while_stale = 86400
+
+    # Configure negative caching for specific response codes
+    negative_caching_policy {
+      code = 404
+      ttl  = 0  # Don't cache 404 responses to ensure SPA routing works
+    }
   }
 }
 
@@ -63,8 +69,29 @@ resource "google_compute_url_map" "frontend_static" {
   name            = "${var.service_name}-url-map"
   default_service = google_compute_backend_bucket.frontend_static.id
 
-  # For SPA routing, we'll use the default_service to serve index.html for all paths
-  # that don't match specific path rules
+  # For SPA routing, we need to configure path matchers to handle client-side routes
+  # This ensures that requests to routes like /upload are handled by the SPA
+  host_rule {
+    hosts        = ["*"]
+    path_matcher = "spa-routes"
+  }
+
+  path_matcher {
+    name            = "spa-routes"
+    default_service = google_compute_backend_bucket.frontend_static.id
+
+    # Static assets should be served directly
+    path_rule {
+      paths   = ["/assets/*", "/config.js", "/favicon.ico", "/robots.txt"]
+      service = google_compute_backend_bucket.frontend_static.id
+    }
+
+    # All other paths should serve index.html to support SPA routing
+    path_rule {
+      paths   = ["/*"]
+      service = google_compute_backend_bucket.frontend_static.id
+    }
+  }
 }
 
 # Create an HTTP target proxy
