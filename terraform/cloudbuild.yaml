@@ -24,22 +24,36 @@ steps:
         echo "$BRANCH_NAME"
         echo "***********************"
 
+        # Map branch names to environments
+        if [ "$BRANCH_NAME" = "main" ]; then
+          export ENVIRONMENT="prod"
+        else
+          export ENVIRONMENT="$BRANCH_NAME"
+        fi
+        echo "Environment: $$ENVIRONMENT"
+        echo "ENVIRONMENT=$$ENVIRONMENT" >> /workspace/env_vars.sh
+
   - id: 'tf init'
     name: 'hashicorp/terraform:1.0.0'
     entrypoint: 'sh'
     args:
       - '-c'
       - |
-        if [ -d "terraform/environments/$BRANCH_NAME/" ]; then
-          echo "init specifically in $BRANCH_NAME branch"
-          cd terraform/environments/$BRANCH_NAME
+        # Source environment variables
+        if [ -f "/workspace/env_vars.sh" ]; then
+          source /workspace/env_vars.sh
+        fi
+
+        if [ -d "terraform/environments/$$ENVIRONMENT/" ]; then
+          echo "init specifically in $$ENVIRONMENT environment"
+          cd terraform/environments/$$ENVIRONMENT
           terraform init
         else
           pwd
           ls
           for dir in terraform/environments/*/
-          do 
-            cd ${dir}   
+          do
+            cd ${dir}
             env=${dir%*/}
             env=${env#*/}
             echo ""
@@ -49,7 +63,7 @@ steps:
             terraform init || exit 1
             cd ../../../
           done
-        fi 
+        fi
 
   # [START tf-plan]
   - id: 'tf plan'
@@ -58,15 +72,20 @@ steps:
     args:
       - '-c'
       - |
-        if [ -d "terraform/environments/$BRANCH_NAME/" ]; then
-          cd terraform/environments/$BRANCH_NAME
+        # Source environment variables
+        if [ -f "/workspace/env_vars.sh" ]; then
+          source /workspace/env_vars.sh
+        fi
+
+        if [ -d "terraform/environments/$$ENVIRONMENT/" ]; then
+          cd terraform/environments/$$ENVIRONMENT
           terraform plan
         else
           for dir in terraform/environments/*/
-          do 
-            cd ${dir}   
+          do
+            cd ${dir}
             env=${dir%*/}
-            env=${env#*/}  
+            env=${env#*/}
             echo ""
             echo "*************** TERRAFORM PLAN ******************"
             echo "******* At environment: ${env} ********"
@@ -84,12 +103,17 @@ steps:
     args:
       - '-c'
       - |
-        if [ -d "terraform/environments/$BRANCH_NAME/" ]; then
-          cd terraform/environments/$BRANCH_NAME      
+        # Source environment variables
+        if [ -f "/workspace/env_vars.sh" ]; then
+          source /workspace/env_vars.sh
+        fi
+
+        if [ -d "terraform/environments/$$ENVIRONMENT/" ]; then
+          cd terraform/environments/$$ENVIRONMENT
           terraform apply -auto-approve
         else
           echo "***************************** SKIPPING APPLYING *******************************"
-          echo "Branch '$BRANCH_NAME' does not represent an official environment."
+          echo "Branch '$BRANCH_NAME' does not map to an official environment."
           echo "*******************************************************************************"
         fi
 # [END tf-apply]
