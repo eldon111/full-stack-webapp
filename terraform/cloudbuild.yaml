@@ -30,8 +30,8 @@ steps:
         else
           export ENVIRONMENT="$BRANCH_NAME"
         fi
-        echo "Environment: $ENVIRONMENT"
-        echo "ENVIRONMENT=$ENVIRONMENT" >> /workspace/env_vars.sh
+        echo "Environment: $$ENVIRONMENT"
+        echo "ENVIRONMENT=$$ENVIRONMENT" >> /workspace/env_vars.sh
 
   - id: 'tf init'
     name: 'hashicorp/terraform:1.0.0'
@@ -44,9 +44,9 @@ steps:
           source /workspace/env_vars.sh
         fi
 
-        if [ -d "terraform/environments/$ENVIRONMENT/" ]; then
-          echo "init specifically in $ENVIRONMENT environment"
-          cd terraform/environments/$ENVIRONMENT
+        if [ -d "terraform/environments/$$ENVIRONMENT/" ]; then
+          echo "init specifically in $$ENVIRONMENT environment"
+          cd terraform/environments/$$ENVIRONMENT
           terraform init
         else
           pwd
@@ -77,8 +77,8 @@ steps:
           source /workspace/env_vars.sh
         fi
 
-        if [ -d "terraform/environments/$ENVIRONMENT/" ]; then
-          cd terraform/environments/$ENVIRONMENT
+        if [ -d "terraform/environments/$$ENVIRONMENT/" ]; then
+          cd terraform/environments/$$ENVIRONMENT
           terraform plan
         else
           for dir in terraform/environments/*/
@@ -108,8 +108,8 @@ steps:
           source /workspace/env_vars.sh
         fi
 
-        if [ -d "terraform/environments/$ENVIRONMENT/" ]; then
-          cd terraform/environments/$ENVIRONMENT
+        if [ -d "terraform/environments/$$ENVIRONMENT/" ]; then
+          cd terraform/environments/$$ENVIRONMENT
           terraform apply -auto-approve
         else
           echo "***************************** SKIPPING APPLYING *******************************"
