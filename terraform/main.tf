@@ -35,7 +35,7 @@ module "backend" {
   labels                   = local.common_labels
 
   # Dependencies
-  depends_on = [module.common]
+  depends_on = [module.common, module.frontend_static]
 }
 
 # Frontend static website module
@@ -44,15 +44,13 @@ module "frontend_static" {
 
   project_id   = var.project_id
   region       = var.region
-  environment  = var.environment
   service_name = var.frontend_service_name
-  backend_url  = module.backend.backend_url
   frontend_domain_name = var.frontend_domain_name
   manage_dns   = var.manage_dns
   labels       = local.common_labels
 
   # Dependencies
-  depends_on = [module.backend]
+  depends_on = [module.common]
 }
 
 # Image processor module

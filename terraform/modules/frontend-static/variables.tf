@@ -8,18 +8,8 @@ variable "region" {
   type        = string
 }
 
-variable "environment" {
-  description = "Environment (dev, prod)"
-  type        = string
-}
-
 variable "service_name" {
   description = "Name of the frontend service"
-  type        = string
-}
-
-variable "backend_url" {
-  description = "URL of the backend service"
   type        = string
 }
 
