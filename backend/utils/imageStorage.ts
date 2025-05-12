@@ -1,13 +1,9 @@
-import { Bucket, GetSignedUrlConfig, Storage } from '@google-cloud/storage';
+import { S3Client, ListObjectsV2Command, GetObjectCommand, PutObjectCommand } from '@aws-sdk/client-s3';
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { UserInfo } from '../trpc';
 
-// Initialize Google Cloud Storage Client
-const storage = new Storage();
-
-// Helper function to get a bucket reference
-function getBucketByName(bucketName: string): Bucket {
-  return storage.bucket(bucketName);
-}
+// Initialize AWS S3 Client
+const s3Client = new S3Client({ region: process.env.AWS_REGION || 'us-east-1' });
 
 function getImageNamespace(userInfo: UserInfo): string {
   return `${userInfo.email}/uploads`;
@@ -18,29 +14,26 @@ function getThumbnailNamespace(userInfo: UserInfo): string {
 }
 
 async function listFilenames(namespace: string): Promise<string[]> {
-  const options = {
-    prefix: namespace,
-  };
+  const command = new ListObjectsV2Command({
+    Bucket: process.env.S3_BUCKET!,
+    Prefix: namespace,
+  });
 
-  const bucket = getBucketByName(process.env.GCS_BUCKET!);
-  const [files] = await bucket.getFiles(options);
-  return files.map((file) => file.name);
+  const response = await s3Client.send(command);
+  return response.Contents?.map(file => file.Key!) || [];
 }
 
-async function generateImageUrl(fileName: string, action: 'read' | 'write' | 'delete' | 'resumable'): Promise<string> {
-  const bucket = getBucketByName(process.env.GCS_BUCKET!);
+async function generateImageUrl(fileName: string, action: 'read' | 'write'): Promise<string> {
+  // Create the appropriate command based on the action
+  const command = action === 'read'
+    ? new GetObjectCommand({ Bucket: process.env.S3_BUCKET!, Key: fileName })
+    : new PutObjectCommand({ Bucket: process.env.S3_BUCKET!, Key: fileName });
 
-  // These options will allow temporary read access to the file
-  const options: GetSignedUrlConfig = {
-    version: 'v4',
-    action: action,
-    expires: Date.now() + 60 * 60 * 1000, // 60 minutes
-  };
+  // Set expiration time (60 minutes)
+  const expiresIn = 60 * 60;
 
-  // Get a v4 signed URL for reading the file
-  const [url] = await bucket.file(fileName).getSignedUrl(options);
-
-  return url;
+  // Generate a signed URL
+  return await getSignedUrl(s3Client, command, { expiresIn });
 }
 
 export async function generateImageURLs(userInfo: UserInfo): Promise<string[]> {
