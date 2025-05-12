@@ -2,6 +2,7 @@
 /.idea/codeStyles
 /.idea/terraform.xml
 .terraform/
+/image-processor/python/
 
 # Logs
 logs
