@@ -6,6 +6,10 @@ batch:
       buildspec: image-processor/buildspec.yml
     - identifier: backend
       buildspec: backend/buildspec.yml
+    - identifier: frontend
+      buildspec: frontend/buildspec.yml
+      depends-on:
+        - backend
 
 phases:
   install:
