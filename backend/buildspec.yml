@@ -1,0 +1,32 @@
+version: 0.2
+
+phases:
+  install:
+    runtime-versions:
+      nodejs: 22
+
+  pre_build:
+    on-failure: ABORT
+    commands:
+      - 'cd backend'
+      - 'npm ci'
+      - 'aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 823369217717.dkr.ecr.us-east-1.amazonaws.com'
+
+  build:
+    on-failure: ABORT
+    commands:
+      - 'npm run build'
+      - echo 'backend built'
+
+  post_build:
+    on-failure: ABORT
+    commands:
+      - 'docker build -t full-stack-webapp/backend .'
+      - 'docker tag full-stack-webapp/backend:latest 823369217717.dkr.ecr.us-east-1.amazonaws.com/full-stack-webapp/backend:latest'
+      - 'docker push 823369217717.dkr.ecr.us-east-1.amazonaws.com/full-stack-webapp/backend:latest'
+      - echo 'Deployment package created and image pushed to ECR successfully!'
+
+#artifacts:
+#  files:
+#    - 'dist/**/*'
+#  base-directory: 'backend'

@@ -4,6 +4,8 @@ batch:
   build-graph:
     - identifier: imageProcessor
       buildspec: image-processor/buildspec.yml
+    - identifier: backend
+      buildspec: backend/buildspec.yml
 
 phases:
   install:
