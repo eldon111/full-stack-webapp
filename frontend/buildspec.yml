@@ -10,12 +10,6 @@ phases:
       - 'cd ../frontend'
       - 'npm ci'
 
-#  pre_build:
-#    on-failure: ABORT
-#    commands:
-#      - 'cd frontend'
-#      - 'npm ci'
-
   build:
     on-failure: ABORT
     commands:
