@@ -2,6 +2,7 @@
 /.idea/codeStyles
 /.idea/terraform.xml
 .terraform/
+/image-processor/python/
 
 # Logs
 logs
@@ -138,3 +139,4 @@ dist
 .yarn/build-state.yml
 .yarn/install-state.gz
 .pnp.*
+.aider*
