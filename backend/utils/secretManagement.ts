@@ -1,16 +1,25 @@
-import { getProjectId } from './projectMetadata';
+import { SecretsManagerClient, GetSecretValueCommand } from '@aws-sdk/client-secrets-manager';
 
-const { SecretManagerServiceClient } = require('@google-cloud/secret-manager').v1;
-const secretManagerClient = new SecretManagerServiceClient();
+const secretsManagerClient = new SecretsManagerClient({ region: process.env.AWS_REGION || 'us-east-1' });
 
 export async function accessSecret(name: String): Promise<string> {
   return (await accessSecretAsBuffer(name)).toString('utf8');
 }
 
 export async function accessSecretAsBuffer(name: String): Promise<Buffer> {
-  const projectId = await getProjectId();
-  const [version] = await secretManagerClient.accessSecretVersion({
-    name: `projects/${projectId}/secrets/${name}-${process.env.NODE_ENV}/versions/latest`,
+  const command = new GetSecretValueCommand({
+    SecretId: `${name}-${process.env.NODE_ENV}`,
   });
-  return version.payload.data;
+
+  const response = await secretsManagerClient.send(command);
+
+  if (response.SecretBinary) {
+    // If the secret is binary, return it as a Buffer
+    return Buffer.from(response.SecretBinary);
+  } else if (response.SecretString) {
+    // If the secret is a string, convert it to a Buffer
+    return Buffer.from(response.SecretString);
+  } else {
+    throw new Error(`Secret ${name}-${process.env.NODE_ENV} has no value`);
+  }
 }

@@ -1,0 +1,30 @@
+version: 0.2
+
+phases:
+  install:
+    runtime-versions:
+      python: 3.x
+
+  pre_build:
+    on-failure: ABORT
+    commands:
+      - 'cd image-processor'
+      - 'mkdir -p python'
+      - 'pip install -r requirements.txt  --only-binary=:all: -t python/'
+
+  build:
+    on-failure: ABORT
+    commands:
+      - 'zip -r layer.zip python'
+      - echo 'Created layer.zip'
+
+  post_build:
+    on-failure: ABORT
+    commands:
+      - 'rm -rf python'
+      - echo 'Deployment package created successfully!'
+
+artifacts:
+  files:
+    - 'layer.zip'
+  base-directory: image-processor
